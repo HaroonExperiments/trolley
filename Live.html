@@ -263,7 +263,7 @@ button{cursor:pointer}
 .rate{width:64px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);text-align:center;font-family:var(--font-num);font-weight:700;font-size:16px}
 .switch{position:relative;width:52px;height:32px;flex-shrink:0}
 .switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
-.switch span{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .2s}
+.switch span{position:absolute;inset:0;pointer-events:none;border-radius:999px;background:var(--line);transition:background .2s}
 .switch span::after{content:'';position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
 .switch input:checked + span{background:var(--accent)}
 .switch input:checked + span::after{transform:translateX(20px)}
@@ -873,17 +873,47 @@ async function readImage(img) {
   const totalOf = () => payable(subtotalOf());
 
   /* ---------- Beep and vibrate ---------- */
+  // iPhone mutes "Web Audio" when the side switch is on silent, but an <audio> element still plays.
+  // So the beep is a tiny sound file made here, played through an <audio> element.
+  function makeBeepUrl() {
+    const rate = 22050, dur = 0.14, n = Math.floor(rate * dur);
+    const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    const w = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    w(36, 'data'); v.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) {
+      const t = i / rate;
+      const env = Math.min(1, t / 0.01) * Math.min(1, (dur - t) / 0.04);
+      v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * 1046 * t) * env * 0.55 * 32767), true);
+    }
+    let bin = '';
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return 'data:audio/wav;base64,' + btoa(bin);
+  }
+  let beepEl = null, beepReady = false;
+  try { beepEl = new Audio(makeBeepUrl()); beepEl.preload = 'auto'; } catch (e) { beepEl = null; }
   let audioCtx = null;
   function unlockAudio() {
+    if (beepEl && !beepReady) {
+      // A first, silent play inside a tap lets the phone play it later on its own.
+      try {
+        beepEl.muted = true;
+        const pr = beepEl.play();
+        const done = () => { try { beepEl.pause(); beepEl.currentTime = 0; } catch (e) {} beepEl.muted = false; beepReady = true; };
+        if (pr && pr.then) pr.then(done, () => { beepEl.muted = false; }); else done();
+      } catch (e) {}
+    }
     try {
       if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     } catch (e) {}
   }
   document.addEventListener('pointerdown', unlockAudio, { capture: true });
-  function feedback() {
-    if (!settings.feedback) return;
-    try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  document.addEventListener('touchend', unlockAudio, { capture: true });
+  function webAudioBeep() {
     try {
       if (!audioCtx) return;
       const t = audioCtx.currentTime;
@@ -896,6 +926,19 @@ async function readImage(img) {
       o.connect(g); g.connect(audioCtx.destination);
       o.start(t); o.stop(t + 0.16);
     } catch (e) {}
+  }
+  function feedback() {
+    if (!settings.feedback) return;
+    try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+    if (beepEl && beepReady) {
+      try {
+        beepEl.currentTime = 0;
+        const pr = beepEl.play();
+        if (pr && pr.catch) pr.catch(webAudioBeep);
+        return;
+      } catch (e) {}
+    }
+    webAudioBeep();
   }
   const NEAR = 0.8; // warn when 80% of the budget is used
   function budgetLevel(total) {
