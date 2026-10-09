@@ -248,6 +248,31 @@ button{cursor:pointer}
 .confirm-recent{display:flex;flex-wrap:wrap;gap:6px}
 .confirm-recent .chip{font-family:var(--font-body);font-size:14px;min-height:36px;padding:0 12px}
 .confirm-edit{border:0;background:transparent;color:var(--accent);font-weight:700;min-height:40px;font-size:14px}
+.foot{grid-template-columns:2fr 1fr 64px}
+.mic{display:flex;align-items:center;justify-content:center;padding:0}
+.meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px}
+.shop-btn{align-self:flex-start;border:0;background:transparent;padding:6px 0;min-height:36px;font-size:14px;font-weight:700;color:var(--ink);text-align:left;display:flex;align-items:center;gap:6px}
+.shop-btn.none{color:var(--muted);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.gst-line{font-size:13px;color:var(--muted)}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-height:56px}
+.set-row .t{font-weight:700;font-size:15px}
+.set-row small{display:block;font-weight:600;font-size:12.5px;color:var(--muted)}
+.seg{display:flex;background:var(--chip);border-radius:12px;padding:3px;gap:3px;flex-shrink:0}
+.seg button{border:0;background:transparent;border-radius:9px;min-height:38px;padding:0 10px;font-weight:700;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.rate{width:64px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);text-align:center;font-family:var(--font-num);font-weight:700;font-size:16px}
+.switch{position:relative;width:52px;height:32px;flex-shrink:0}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .2s}
+.switch span::after{content:'';position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.switch input:checked + span{background:var(--accent)}
+.switch input:checked + span::after{transform:translateX(20px)}
+.switch input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.listen{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:8px 0}
+.listen-dot{width:72px;height:72px;border-radius:50%;background:var(--primary-bg);color:var(--primary-fg);display:flex;align-items:center;justify-content:center;animation:pulse2 1.2s ease-in-out infinite}
+@keyframes pulse2{50%{transform:scale(1.08);box-shadow:0 0 0 12px rgba(29,117,80,.12)}}
+.listen-text{font-size:22px;font-weight:700;min-height:30px}
+.listen-hint{color:var(--muted);font-size:14px;margin:0}
 .toast{position:fixed;left:16px;right:16px;bottom:calc(110px + env(safe-area-inset-bottom,0px));margin:0 auto;max-width:528px;background:#13261F;color:#FFFFFF;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:8px 8px 8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600;font-size:15px;z-index:25;box-shadow:0 12px 30px rgba(0,0,0,.25)}
 .toast span{padding:8px 0}
 .toast button,.toast label{border:0;background:transparent;color:#FFE15A;font-weight:800;min-height:40px;padding:0 10px;display:flex;align-items:center;cursor:pointer}
@@ -281,8 +306,12 @@ button{cursor:pointer}
     </div>
     <div id="total" class="total num" aria-live="polite">0</div>
     <div id="count" class="sub">Scan a price tag to start</div>
+    <div id="gstLine" class="gst-line" hidden></div>
     <div id="bar" class="bar" aria-hidden="true" hidden><span></span></div>
-    <button id="budgetBtn" class="budget-btn none" type="button">Set a budget</button>
+    <div class="meta-row">
+      <button id="budgetBtn" class="budget-btn none" type="button">Set a budget</button>
+      <button id="shopBtn" class="shop-btn none" type="button">Add shop name</button>
+    </div>
     <div id="alert" class="alert" role="alert" hidden>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
       <span id="alertTxt"></span>
@@ -304,6 +333,9 @@ button{cursor:pointer}
       Scan price
     </button>
     <button id="manual" class="type" type="button">Type</button>
+    <button id="voiceBtn" class="type mic" type="button" aria-label="Say an item and its price">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+    </button>
     <input id="cam" type="file" accept="image/*" capture="environment" hidden>
   </footer>
 </div>
@@ -427,6 +459,37 @@ button{cursor:pointer}
   </form>
 </div>
 
+<!-- Shop name -->
+<div id="shopWrap" class="sheet-wrap" hidden>
+  <button id="shopScrim" class="scrim" type="button" aria-label="Close"></button>
+  <form id="shopForm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="shopTitle" novalidate>
+    <div class="sheet-head"><h2 id="shopTitle">Shop name</h2></div>
+    <div class="note-field">
+      <label for="fShop">Where are you shopping?</label>
+      <input id="fShop" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Imtiaz, Al-Fatah, Carrefour" enterkeyhint="done">
+    </div>
+    <div id="shopRecent" class="confirm-recent" style="display:flex;flex-wrap:wrap;gap:6px" hidden></div>
+    <div class="actions">
+      <button id="shopClear" class="btn secondary" type="button">No shop</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</div>
+
+<!-- Voice entry -->
+<div id="voiceWrap" class="sheet-wrap" hidden>
+  <button id="voiceScrim" class="scrim" type="button" aria-label="Stop listening"></button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="voiceTitle">
+    <div class="listen">
+      <div class="listen-dot" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+      <h2 id="voiceTitle" style="margin:0;font-size:18px">Listening…</h2>
+      <div id="voiceText" class="listen-text" aria-live="polite"></div>
+      <p class="listen-hint">Say the item and price, like "milk 290" or "2 bread 150".</p>
+    </div>
+    <button id="voiceStop" class="btn secondary" type="button">Cancel</button>
+  </div>
+</div>
+
 <!-- More menu -->
 <div id="menuWrap" class="sheet-wrap" hidden>
   <button id="menuScrim" class="scrim" type="button" aria-label="Close"></button>
@@ -444,6 +507,36 @@ button{cursor:pointer}
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
         <span>Shopping history<small>Past trips and this month's spending</small></span>
       </button>
+    </div>
+    <div class="sec-lbl">Your data</div>
+    <div class="menu-list">
+      <button id="mBackup" class="menu-item" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
+        <span>Save backup<small>Keep a copy of your list and history in Files or WhatsApp</small></span>
+      </button>
+      <label class="menu-item" for="restoreFile" style="cursor:pointer">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M5 5h14"/></svg>
+        <span>Restore backup<small>Bring back trips from a saved backup file</small></span>
+      </label>
+      <input id="restoreFile" type="file" accept=".json,application/json,text/plain" hidden>
+    </div>
+    <div class="sec-lbl">Settings</div>
+    <div class="menu-list">
+      <div class="set-row">
+        <span><span class="t">Tag prices</span><small id="gstHelp">Shelf prices already include GST</small></span>
+        <div class="seg" role="group" aria-label="Tag prices and GST">
+          <button id="gstIncl" type="button">Incl. GST</button>
+          <button id="gstExcl" type="button">Excl. GST</button>
+        </div>
+      </div>
+      <div id="gstRateRow" class="set-row" hidden>
+        <label for="gstRate"><span class="t">GST rate (%)</span><small>Added on top of tag prices</small></label>
+        <input id="gstRate" class="rate" type="text" inputmode="decimal" autocomplete="off">
+      </div>
+      <div class="set-row">
+        <label for="fbToggle"><span class="t">Beep and vibrate</span><small>When a price is read. iPhone: beep only</small></label>
+        <span class="switch"><input id="fbToggle" type="checkbox" role="switch"><span></span></span>
+      </div>
     </div>
     <div class="sec-lbl" id="themeLbl">Colour theme</div>
     <div class="themes" role="group" aria-labelledby="themeLbl">
@@ -769,7 +862,41 @@ async function readImage(img) {
     return r.toLocaleString('en-US', Number.isInteger(r) ? { maximumFractionDigits: 0 } : { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
   const numStr = (v) => (Number.isInteger(v) ? String(v) : (Math.round(v * 100) / 100).toFixed(2));
-  const totalOf = () => state.lines.reduce((a, l) => a + l.price * l.qty, 0);
+  const SET_KEY = 'trolley-calc.settings.v1';
+  let settings = { gstMode: 'incl', gstRate: 18, feedback: true };
+  try { settings = Object.assign(settings, JSON.parse(localStorage.getItem(SET_KEY) || '{}')); } catch (e) {}
+  const saveSettings = () => { try { localStorage.setItem(SET_KEY, JSON.stringify(settings)); } catch (e) {} };
+  const gstRate = () => Math.max(0, Math.min(100, num(settings.gstRate)));
+  // What you will pay at the counter. Adds GST only when tag prices exclude it.
+  const payable = (sub) => (settings.gstMode === 'excl' ? sub * (1 + gstRate() / 100) : sub);
+  const subtotalOf = () => state.lines.reduce((a, l) => a + l.price * l.qty, 0);
+  const totalOf = () => payable(subtotalOf());
+
+  /* ---------- Beep and vibrate ---------- */
+  let audioCtx = null;
+  function unlockAudio() {
+    try {
+      if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
+  }
+  document.addEventListener('pointerdown', unlockAudio, { capture: true });
+  function feedback() {
+    if (!settings.feedback) return;
+    try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+    try {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(1046, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t + 0.16);
+    } catch (e) {}
+  }
   const NEAR = 0.8; // warn when 80% of the budget is used
   function budgetLevel(total) {
     const bud = num(state.budget);
@@ -1026,12 +1153,12 @@ async function readImage(img) {
 
   function update() {
     $('fQty').textContent = String(sheet.qty);
-    let base = totalOf();
+    let base = subtotalOf();
     if (sheet.mode === 'edit') {
       const l = state.lines.find((x) => x.id === sheet.id);
       if (l) base -= l.price * l.qty;
     }
-    const after = base + num($('fAmt').value) * sheet.qty;
+    const after = payable(base + num($('fAmt').value) * sheet.qty);
     $('newTotal').textContent = fmt(after);
     const lvl = num($('fAmt').value) > 0 ? budgetLevel(after) : 'none';
     const bud = num(state.budget);
@@ -1249,6 +1376,7 @@ async function readImage(img) {
         if (!sheet.typed) $('fAmt').value = numStr(list[0].value);
         setStatus('Check the number matches the tag.', 'ok');
         showChips(list.map((c) => c.value));
+        feedback();
       } else {
         setStatus('No price found. Draw around the price on the photo, or type it.', 'warn');
       }
@@ -1326,23 +1454,30 @@ async function readImage(img) {
       id: Date.now(),
       at: new Date().toISOString(),
       total: totalOf(),
+      subtotal: subtotalOf(),
+      gstMode: settings.gstMode,
+      gstRate: gstRate(),
+      shop: state.shop || '',
       pieces: state.lines.reduce((a, l) => a + l.qty, 0),
       budget: num(state.budget),
       lines: state.lines.map((l) => ({ price: l.price, qty: l.qty, note: l.note || '' }))
     };
     const before = state.lines.slice();
+    const beforeShop = state.shop || '';
     history.unshift(trip);
     if (history.length > 300) history.length = 300;
     saveHistory();
     state.lines = [];
+    state.shop = '';
     commit();
     closeMenu();
-    toast('Saved ' + fmt(trip.total) + ' to history', {
+    toast('Saved ' + fmt(trip.total) + (trip.shop ? ' at ' + trip.shop : '') + ' to history', {
       label: 'Undo',
       fn: () => {
         history = history.filter((t) => t.id !== trip.id);
         saveHistory();
         state.lines = before;
+        state.shop = beforeShop;
         commit();
       }
     });
@@ -1376,7 +1511,8 @@ async function readImage(img) {
       dt.textContent = d.toLocaleDateString('en-GB', DAY_FMT) + ', ' + d.toLocaleTimeString('en-US', TIME_FMT);
       const sub = document.createElement('div');
       sub.className = 'trip-sub';
-      let subTxt = t.pieces + (t.pieces === 1 ? ' item' : ' items');
+      let subTxt = (t.shop ? t.shop + ', ' : '') + t.pieces + (t.pieces === 1 ? ' item' : ' items');
+      if (t.gstMode === 'excl') subTxt += ', incl. ' + fmt(t.total - t.subtotal) + ' GST';
       if (t.budget > 0) subTxt += t.total > t.budget ? ', ' + fmt(t.total - t.budget) + ' over budget' : ', ' + fmt(t.budget - t.total) + ' under budget';
       sub.textContent = subTxt;
       left.append(dt, sub);
@@ -1469,6 +1605,16 @@ async function readImage(img) {
     $('total').textContent = fmt(total);
     $('count').textContent = n === 0 ? 'Scan a price tag to start' : pieces + (pieces === 1 ? ' item' : ' items');
     $('share').hidden = n === 0;
+    const sub = subtotalOf();
+    if (settings.gstMode === 'excl' && n > 0) {
+      $('gstLine').textContent = 'Tags ' + fmt(sub) + ' + GST ' + fmt(gstRate()) + '% ' + fmt(total - sub);
+      $('gstLine').hidden = false;
+    } else {
+      $('gstLine').hidden = true;
+    }
+    const sb = $('shopBtn');
+    sb.className = 'shop-btn' + (state.shop ? '' : ' none');
+    sb.textContent = state.shop ? 'At ' + state.shop : 'Add shop name';
     $('reset').hidden = n === 0;
     $('emptyHist').hidden = history.length === 0;
     const bud = num(state.budget);
@@ -1639,13 +1785,205 @@ async function readImage(img) {
     else if (!$('menuWrap').hidden) closeMenu();
   });
 
+  /* ---------- Shop name ---------- */
+  function openShop() {
+    $('fShop').value = state.shop || '';
+    const seenS = new Set();
+    const shops = [];
+    history.forEach((t) => { const v = String(t.shop || '').trim(); const k = v.toLowerCase(); if (v && !seenS.has(k) && shops.length < 8) { seenS.add(k); shops.push(v); } });
+    const box = $('shopRecent');
+    box.textContent = '';
+    shops.forEach((v) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.style.fontFamily = 'var(--font-body)';
+      b.textContent = v;
+      b.addEventListener('click', () => { state.shop = v; closeShop(); commit(); });
+      box.appendChild(b);
+    });
+    box.hidden = shops.length === 0;
+    $('shopWrap').hidden = false;
+    setTimeout(() => $('fShop').focus(), 50);
+  }
+  const closeShop = () => { $('shopWrap').hidden = true; };
+  $('shopBtn').addEventListener('click', openShop);
+  $('shopScrim').addEventListener('click', closeShop);
+  $('shopClear').addEventListener('click', () => { state.shop = ''; closeShop(); commit(); });
+  $('shopForm').addEventListener('submit', (e) => { e.preventDefault(); state.shop = $('fShop').value.trim().slice(0, 40); closeShop(); commit(); });
+
+  /* ---------- Settings: GST and feedback ---------- */
+  function renderSettings() {
+    const excl = settings.gstMode === 'excl';
+    $('gstIncl').setAttribute('aria-pressed', String(!excl));
+    $('gstExcl').setAttribute('aria-pressed', String(excl));
+    $('gstRateRow').hidden = !excl;
+    $('gstRate').value = String(gstRate());
+    $('gstHelp').textContent = excl ? 'GST is added on top of shelf prices' : 'Shelf prices already include GST';
+    $('fbToggle').checked = !!settings.feedback;
+  }
+  $('gstIncl').addEventListener('click', () => { settings.gstMode = 'incl'; saveSettings(); renderSettings(); commit(); });
+  $('gstExcl').addEventListener('click', () => { settings.gstMode = 'excl'; saveSettings(); renderSettings(); commit(); });
+  $('gstRate').addEventListener('input', () => { settings.gstRate = num($('gstRate').value); saveSettings(); commit(); });
+  $('fbToggle').addEventListener('change', () => { settings.feedback = $('fbToggle').checked; saveSettings(); if (settings.feedback) { unlockAudio(); feedback(); } });
+  $('openMenu').addEventListener('click', renderSettings);
+
+  /* ---------- Voice entry ---------- */
+  const WORD_NUM = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, a: 1, an: 1, single: 1, double: 2 };
+  const FILLER = new Set(['rs', 'rs.', 'rupees', 'rupee', 'rupay', 'rupaye', 'price', 'for', 'of', 'at', 'each', 'x', 'times', 'pieces', 'piece', 'packets', 'packet', 'pcs', 'pc', 'packs', 'pack', 'and', 'the', 'is', 'add', 'please', 'only', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'a', 'an', 'single', 'double']);
+  function parseSpoken(text) {
+    const words = String(text || '').toLowerCase().replace(/,(?=\d{3})/g, '').replace(/[^a-z0-9.\s-]/g, ' ').split(/\s+/).filter(Boolean);
+    const nums = [];
+    const UNIT = /^(kg|kgs|kilo|kilos|kilogram|kilograms|g|gm|gms|gram|grams|l|ltr|litre|litres|liter|liters|ml|mls)$/;
+    words.forEach((w, i) => {
+      if (UNIT.test(words[i + 1] || '')) return; // a size, e.g. "3 litre", stays in the note
+      if (/^\d+(\.\d+)?$/.test(w)) nums.push({ v: parseFloat(w), i, word: false });
+      else if (WORD_NUM[w] != null && w !== 'a' && w !== 'an') nums.push({ v: WORD_NUM[w], i, word: true });
+    });
+    let qty = 1, price = 0;
+    const qtyCue = (i) => /^(x|times|pieces|piece|packets|packet|pcs|pc|packs|pack)$/.test(words[i + 1] || '') || words[i - 1] === 'x';
+    const cued = nums.find((n) => qtyCue(n.i) && n.v <= 50);
+    if (cued) qty = Math.round(cued.v);
+    let rest = nums.filter((n) => n !== cued);
+    if (!cued && rest.length >= 2 && rest[0].v <= 20 && rest[0].i < rest[rest.length - 1].i) { qty = Math.round(rest[0].v); rest = rest.slice(1); }
+    const digits = rest.filter((n) => !n.word);
+    const pool = digits.length ? digits : rest;
+    if (pool.length) price = pool.reduce((m, n) => (n.v > m ? n.v : m), 0);
+    const note = words.filter((w, i) => !nums.some((n) => n.i === i) && !FILLER.has(w)).join(' ').trim().slice(0, 40);
+    return { price, qty: Math.max(1, qty), note };
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  function closeVoice() { $('voiceWrap').hidden = true; if (rec) { try { rec.abort(); } catch (e) {} rec = null; } }
+  function fillFromSpeech(text) {
+    const r = parseSpoken(text);
+    openSheet('manual');
+    if (r.price > 0) $('fAmt').value = numStr(r.price);
+    $('fNote').value = r.note ? r.note.charAt(0).toUpperCase() + r.note.slice(1) : '';
+    sheet.qty = r.qty;
+    sheet.typed = true;
+    update();
+    if (r.price > 0) { try { $('fAmt').blur(); } catch (e) {} feedback(); }
+    else toast('Heard "' + text + '" but no price. Type it in.');
+  }
+  function manualWithKeyboardMic(msg) {
+    openSheet('manual');
+    setTimeout(() => toast(msg), 80);
+  }
+  $('voiceBtn').addEventListener('click', () => {
+    unlockAudio();
+    if (!SR) { manualWithKeyboardMic('Tap the microphone on your keyboard to speak'); return; }
+    try {
+      rec = new SR();
+      rec.lang = 'en-US';
+      rec.interimResults = true;
+      rec.maxAlternatives = 1;
+      let finalText = '';
+      $('voiceText').textContent = '';
+      $('voiceWrap').hidden = false;
+      rec.onresult = (e) => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+          else interim += e.results[i][0].transcript;
+        }
+        $('voiceText').textContent = (finalText + ' ' + interim).trim();
+      };
+      rec.onerror = (e) => {
+        const code = e && e.error;
+        closeVoice();
+        if (code === 'not-allowed' || code === 'service-not-allowed') manualWithKeyboardMic('Microphone not allowed here. Tap the mic on your keyboard instead');
+        else if (code === 'no-speech') toast('Did not hear anything. Tap the mic and try again');
+        else if (code !== 'aborted') manualWithKeyboardMic('Voice not available. Tap the mic on your keyboard instead');
+      };
+      rec.onend = () => {
+        const text = (finalText || $('voiceText').textContent || '').trim();
+        const wasOpen = !$('voiceWrap').hidden;
+        $('voiceWrap').hidden = true;
+        rec = null;
+        if (wasOpen && text) fillFromSpeech(text);
+      };
+      rec.start();
+    } catch (e) {
+      closeVoice();
+      manualWithKeyboardMic('Tap the microphone on your keyboard to speak');
+    }
+  });
+  $('voiceStop').addEventListener('click', closeVoice);
+  $('voiceScrim').addEventListener('click', closeVoice);
+
+  /* ---------- Backup and restore ---------- */
+  function backupData() {
+    let theme = 'auto';
+    try { theme = localStorage.getItem(THEME_KEY) || 'auto'; } catch (e) {}
+    return JSON.stringify({ app: 'Trolley Total', version: 1, savedAt: new Date().toISOString(), state, history, settings, theme });
+  }
+  async function saveBackup() {
+    const data = backupData();
+    const d = new Date();
+    const name = 'trolley-backup-' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '.json';
+    // Inside Claude: the app's own save prompt.
+    try {
+      if (window.claude && window.claude.use) {
+        const dl = await window.claude.use('downloads');
+        if (dl) { await dl.save({ filename: name, data }); toast('Backup saved'); return; }
+      }
+    } catch (e) {
+      if (e && e.code === 'declined') return;
+    }
+    // Phone share sheet: Save to Files, WhatsApp and so on.
+    try {
+      const file = new File([data], name, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Trolley Total backup' }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    try {
+      const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast('Backup saved to Downloads');
+    } catch (e) {
+      try { await navigator.clipboard.writeText(data); toast('Backup copied as text. Paste it in a note to keep it'); }
+      catch (e2) { toast('Could not save a backup here'); }
+    }
+  }
+  $('mBackup').addEventListener('click', () => { closeMenu(); saveBackup(); });
+  $('restoreFile').addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    closeMenu();
+    try {
+      const b = JSON.parse(await f.text());
+      if (!b || b.app !== 'Trolley Total' || !Array.isArray(b.history)) throw new Error('not a backup');
+      const have = new Set(history.map((t) => t.id));
+      const added = b.history.filter((t) => t && t.id && !have.has(t.id) && Array.isArray(t.lines));
+      history = history.concat(added).sort((x, y) => String(y.at).localeCompare(String(x.at))).slice(0, 300);
+      saveHistory();
+      let lines = 0;
+      if (!state.lines.length && b.state && Array.isArray(b.state.lines) && b.state.lines.length) {
+        state.lines = b.state.lines;
+        state.nextId = Math.max(state.nextId || 1, (b.state.nextId || 1));
+        if (!num(state.budget) && b.state.budget) state.budget = b.state.budget;
+        if (!state.shop && b.state.shop) state.shop = b.state.shop;
+        lines = state.lines.length;
+      }
+      commit();
+      toast('Restored ' + added.length + (added.length === 1 ? ' trip' : ' trips') + (lines ? ' and your current list' : ''));
+    } catch (err) {
+      toast('That file is not a Trolley Total backup');
+    }
+  });
+
   function listText() {
     const total = totalOf();
     const pieces = state.lines.reduce((a, l) => a + l.qty, 0);
     const rows = state.lines.map((l, i) => (i + 1) + '. ' + (l.note ? l.note + ': ' : '') + (l.qty > 1 ? fmt(l.price) + ' x ' + l.qty + ' = ' + fmt(l.price * l.qty) : fmt(l.price)));
     const bud = num(state.budget);
     const tail = bud > 0 ? (total > bud ? '\n' + fmt(total - bud) + ' over budget of ' + fmt(bud) : '\n' + fmt(bud - total) + ' left of ' + fmt(bud)) : '';
-    return 'Shopping total: ' + fmt(total) + ' (' + pieces + (pieces === 1 ? ' item' : ' items') + ')\n' + rows.join('\n') + tail;
+    const sub = subtotalOf();
+    const gst = settings.gstMode === 'excl' ? '\nTags ' + fmt(sub) + ' + GST ' + fmt(gstRate()) + '% ' + fmt(total - sub) : '';
+    return 'Shopping total' + (state.shop ? ' at ' + state.shop : '') + ': ' + fmt(total) + ' (' + pieces + (pieces === 1 ? ' item' : ' items') + ')\n' + rows.join('\n') + gst + tail;
   }
   $('share').addEventListener('click', async () => {
     const text = listText();
@@ -1800,7 +2138,7 @@ async function readImage(img) {
     live.paused = true;
     clearTimeout(live.timer);
     $('liveFrame').classList.add('locked');
-    if (navigator.vibrate) { try { navigator.vibrate(40); } catch (e) {} }
+    feedback();
     live.card = { value: list[0].value, qty: 1, list, canvas: c, thumb: thumbOf(c) };
     $('confirmImg').src = c.toDataURL('image/jpeg', 0.6);
     const alts = list.slice(1, 5).map((x) => x.value);
@@ -1842,7 +2180,7 @@ async function readImage(img) {
     $('confirmAmt').textContent = fmt(k.value);
     $('cQty').textContent = String(k.qty);
     const bud = num(state.budget);
-    const after = totalOf() + k.value * k.qty;
+    const after = payable(subtotalOf() + k.value * k.qty);
     const lvl = budgetLevel(after);
     $('confirmQ').textContent = lvl === 'over' ? 'Add this? You will be ' + fmt(after - bud) + ' over budget' : lvl === 'near' ? 'Add this? Only ' + fmt(bud - after) + ' left after' : 'Add this price?';
     Array.from($('confirmAlts').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === k.value)));
