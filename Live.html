@@ -1,0 +1,1874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Trolley Live">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACDklEQVR42u3dQY6CMBSAYWm8ge7deQnXnNq1t/EQLkyIMSjEmPY9+n3LySSM5Z9SaGYYDufTDuYUQ4A4EAfiQByIA3EgDsSBOBAHiANxIA7EgTgQB+JAHIgDcYA4EAfiQByIA3EgDsSBOBAHiANxIA7EgTgQB+JAHIgDcSAOEAfiQByIA3EgDsSBOBAH/dk3PPb9enEC1jiOtybHHZq8AFAWKRIpysii/rgVZegjRBzKyDWGRRn6cCtL1DhMGxnH08yBOBAH4qCGfcwf6+1RsfWsmWO+jF27nSdxRC9DH+JYLkAf/a451pz743hbXH+kbijU6srdCuJAHIiDzuJYsxbzNKzfmeP7uVdG75eVTwUoQxzzHSijiaAbb2owcyAOxIE1R3TWK2YOxIE4EAfiQByIA3GAOBAH4kAciANxkMEGt+xf/1b2uX0/fWXazY//PWYOXFYQB+JAHIjDECAOxIE4EAfiQByIA3EgDsQB4kAciANxIA7EQQ7D4XyqcBj/4e/vKrytzMyBOAgbh7d+ZhxPMwcB4jB5pBvJsslPpYyUlxV9JBq9svlPqIyfVXoINsuTseC/Ti3jwN0K4kAciAPEgTgQB+JAHIgDcSAOxIE4EAeIA3EgDsSBOBAH4kAciANxgDgQB+JAHIgDcSAOxIE4EAeIA3EgDsSBOBAH4kAciANxIA4QB+JAHIiDRh5iJnHOT9yNIAAAAABJRU5ErkJggg==">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACDklEQVR42u3dQY6CMBSAYWm8ge7deQnXnNq1t/EQLkyIMSjEmPY9+n3LySSM5Z9SaGYYDufTDuYUQ4A4EAfiQByIA3EgDsSBOBAHiANxIA7EgTgQB+JAHIgDcYA4EAfiQByIA3EgDsSBOBAHiANxIA7EgTgQB+JAHIgDcSAOEAfiQByIA3EgDsSBOBAH/dk3PPb9enEC1jiOtybHHZq8AFAWKRIpysii/rgVZegjRBzKyDWGRRn6cCtL1DhMGxnH08yBOBAH4qCGfcwf6+1RsfWsmWO+jF27nSdxRC9DH+JYLkAf/a451pz743hbXH+kbijU6srdCuJAHIiDzuJYsxbzNKzfmeP7uVdG75eVTwUoQxzzHSijiaAbb2owcyAOxIE1R3TWK2YOxIE4EAfiQByIA3GAOBAH4kAciANxkMEGt+xf/1b2uX0/fWXazY//PWYOXFYQB+JAHIjDECAOxIE4EAfiQByIA3EgDsQB4kAciANxIA7EQQ7D4XyqcBj/4e/vKrytzMyBOAgbh7d+ZhxPMwcB4jB5pBvJsslPpYyUlxV9JBq9svlPqIyfVXoINsuTseC/Ti3jwN0K4kAciAPEgTgQB+JAHIgDcSAOxIE4EAeIA3EgDsSBOBAH4kAciANxgDgQB+JAHIgDcSAOxIE4EAeIA3EgDsSBOBAH4kAciANxIA4QB+JAHIiDRh5iJnHOT9yNIAAAAABJRU5ErkJggg==">
+<title>Trolley Total Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a calculator tape. Big total on top, list of amounts scrolls, scan and type buttons at the bottom. */
+:root{
+  --bg:#F3F5F1; --surface:#FFFFFF; --ink:#13261F; --muted:#55655D; --line:#DCE2DD;
+  --accent:#1D7550; --accent-soft:#E1F3E9; --tag:#FFE15A; --tag-ink:#13261F;
+  --warn:#AD3709; --warn-soft:#FCEBE2;
+  --primary-bg:#13261F; --primary-fg:#FFFFFF; --primary-icon:#FFE15A;
+  --chip:#EEF1EC;
+  --near:#8A5300; --near-soft:#FFF1CC;
+  --scrim:rgba(10,20,16,.45);
+  --font-body:'Manrope', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif;
+  --font-num:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1612; --surface:#16231D; --ink:#EDF3EF; --muted:#9DB0A6; --line:#2A3B33;
+    --accent:#6FD9A4; --accent-soft:#163A2A; --warn:#FF9C70; --warn-soft:#3A1D10;
+    --primary-bg:#FFE15A; --primary-fg:#13261F; --primary-icon:#13261F; --chip:#22322B; --near:#FFC857; --near-soft:#3A2C0D;
+    --scrim:rgba(0,0,0,.6); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1612; --surface:#16231D; --ink:#EDF3EF; --muted:#9DB0A6; --line:#2A3B33;
+  --accent:#6FD9A4; --accent-soft:#163A2A; --warn:#FF9C70; --warn-soft:#3A1D10;
+  --primary-bg:#FFE15A; --primary-fg:#13261F; --primary-icon:#13261F; --chip:#22322B; --near:#FFC857; --near-soft:#3A2C0D;
+  --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}
+/* Themes picked inside the app win over the phone setting. */
+html:root[data-palette="light"]{
+  --bg:#F3F5F1; --surface:#FFFFFF; --ink:#13261F; --muted:#55655D; --line:#DCE2DD;
+  --accent:#1D7550; --accent-soft:#E1F3E9; --warn:#AD3709; --warn-soft:#FCEBE2;
+  --primary-bg:#13261F; --primary-fg:#FFFFFF; --primary-icon:#FFE15A; --chip:#EEF1EC; --near:#8A5300; --near-soft:#FFF1CC;
+  --scrim:rgba(10,20,16,.45); color-scheme:light;
+}
+html:root[data-palette="dark"]{
+  --bg:#0D1612; --surface:#16231D; --ink:#EDF3EF; --muted:#9DB0A6; --line:#2A3B33;
+  --accent:#6FD9A4; --accent-soft:#163A2A; --warn:#FF9C70; --warn-soft:#3A1D10;
+  --primary-bg:#FFE15A; --primary-fg:#13261F; --primary-icon:#13261F; --chip:#22322B; --near:#FFC857; --near-soft:#3A2C0D;
+  --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}
+html:root[data-palette="ocean"]{
+  --bg:#0B1E2D; --surface:#12293B; --ink:#E8F1F8; --muted:#A3BACB; --line:#25425A;
+  --accent:#62CDEB; --accent-soft:#123A4E; --warn:#FFA27E; --warn-soft:#3B2219;
+  --primary-bg:#62CDEB; --primary-fg:#0B1E2D; --primary-icon:#0B1E2D; --chip:#1A3448; --near:#FFC857; --near-soft:#3A2C0D;
+  --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}
+html:root[data-palette="rose"]{
+  --bg:#FBF3F4; --surface:#FFFFFF; --ink:#3A1F27; --muted:#76575F; --line:#EFD9DD;
+  --accent:#A93A62; --accent-soft:#F8E2EA; --warn:#A8360B; --warn-soft:#FCE9E0;
+  --primary-bg:#A93A62; --primary-fg:#FFFFFF; --primary-icon:#FFE15A; --chip:#F6E7EA; --near:#8A5300; --near-soft:#FFF1CC;
+  --scrim:rgba(40,15,22,.45); color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,label{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+
+.app{height:100%;max-width:560px;margin:0 auto;padding-inline:16px;display:flex;flex-direction:column}
+.top{padding-block:16px 14px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;justify-content:space-between}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.total{font-size:clamp(48px,15vw,64px);font-weight:700;letter-spacing:-.02em;line-height:1.05;overflow-wrap:anywhere}
+.sub{font-size:14px;color:var(--muted)}
+.top-actions{display:flex;align-items:center;gap:2px}
+.icon-btn{border:0;background:transparent;color:var(--muted);min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;padding:0 6px;border-radius:12px}
+.budget-btn{align-self:flex-start;border:0;background:transparent;padding:6px 0;min-height:36px;font-size:14px;font-weight:700;color:var(--accent);text-align:left}
+.budget-btn.over{color:var(--warn)}
+.budget-btn.none{color:var(--muted);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.bar{height:8px;background:var(--chip);border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .3s ease}
+.bar.over span{background:#C4320A}
+.bar.near span{background:var(--near)}
+.total.over{color:var(--warn)}
+.alert{display:flex;align-items:center;gap:10px;border-radius:12px;padding:10px 12px;font-weight:700;font-size:15px;line-height:1.3}
+.alert svg{flex-shrink:0}
+.alert.near{background:var(--near-soft);color:var(--near)}
+.alert.over{background:#B42318;color:#FFFFFF}
+.alert.pulse{animation:pulse .5s ease-in-out 2}
+@keyframes pulse{50%{transform:scale(1.03)}}
+.reset-btn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;min-height:40px;padding:0 12px;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;margin-left:4px}
+.reset-btn.armed{border-color:#B42318;background:#B42318;color:#FFFFFF}
+.sheet-warn{border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700}
+.sheet-warn.near{background:var(--near-soft);color:var(--near)}
+.sheet-warn.over{background:#B42318;color:#FFFFFF}
+
+.tape{flex:1;min-height:0;overflow-y:auto;list-style:none;margin:0;padding:8px 0 12px;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
+.line{display:flex;align-items:center;gap:6px;border-bottom:1px dashed var(--line);padding:4px 0}
+.line-main{flex:1;min-width:0;border:0;background:transparent;text-align:left;padding:10px 4px;display:flex;align-items:center;gap:10px;border-radius:10px}
+.line-n{color:var(--muted);font-size:13px;min-width:20px}
+.thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--chip)}
+.line-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.line-note{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line-calc{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line-amt{font-size:20px;font-weight:700;white-space:nowrap}
+.stepper{display:flex;align-items:center;background:var(--chip);border-radius:12px;flex-shrink:0}
+.stepper button{width:40px;height:44px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.stepper .q{min-width:22px;text-align:center;font-weight:700}
+.finish-li{list-style:none;padding-top:14px}
+.finish{width:100%;min-height:48px;border:1px dashed var(--accent);background:transparent;color:var(--accent);border-radius:14px;font-weight:800;font-size:15px}
+
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:16px 8px;color:var(--muted)}
+.mini-tag{background:var(--tag);color:var(--tag-ink);border-radius:6px;padding:10px 16px;transform:rotate(-3deg);font-family:var(--font-num);font-size:30px;font-weight:700;box-shadow:0 8px 20px rgba(19,38,31,.18)}
+.empty h2{margin:6px 0 0;font-size:19px;color:var(--ink)}
+.empty p{margin:0;max-width:30ch;font-size:15px}
+.empty .link{border:0;background:transparent;color:var(--accent);font-weight:700;min-height:44px}
+
+.foot{padding-block:12px 14px;border-top:1px solid var(--line);display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.scan{height:64px;border-radius:18px;background:var(--primary-bg);color:var(--primary-fg);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;user-select:none}
+.scan svg{stroke:var(--primary-icon)}
+.scan:active{transform:scale(.99)}
+.type{height:64px;border-radius:18px;border:1px solid var(--line);background:var(--surface);font-size:16px;font-weight:800}
+
+.sheet-wrap{position:fixed;inset:0;z-index:20}
+.scrim{position:absolute;inset:0;background:var(--scrim);border:0;width:100%;padding:0}
+.sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;max-height:94%;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:rise .2s ease-out}
+@keyframes rise{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sheet h2{margin:0;font-size:20px;font-weight:800}
+.close-x{width:44px;height:44px;border:0;border-radius:22px;background:var(--chip);display:flex;align-items:center;justify-content:center}
+.retake{font-size:15px;font-weight:700;color:var(--accent);cursor:pointer;min-height:44px;display:flex;align-items:center;padding:0 4px}
+.photo-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
+.photo-box{position:relative;display:inline-block;max-width:100%;border-radius:14px;overflow:hidden;background:#000;line-height:0}
+.photo-box img{display:block;max-width:100%;max-height:32vh;width:auto;height:auto;min-height:120px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.overlay{position:absolute;inset:0;touch-action:none;cursor:crosshair}
+.nb{position:absolute;border:2px solid #FFE15A;border-radius:6px;background:rgba(255,225,90,.14);padding:0;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.nb::after{content:'';position:absolute;inset:-6px}
+.nb.sel{border:3px solid #2BD47D;background:rgba(43,212,125,.22)}
+.nb.dim{opacity:.35}
+.ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ink polyline{fill:none;stroke:#FFFFFF;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px rgba(0,0,0,.8))}
+.ink rect{fill:rgba(255,255,255,.12);stroke:#FFFFFF;stroke-width:2.5;stroke-dasharray:7 5}
+.photo-hint{margin:0;font-size:13px;font-weight:600;color:var(--muted);text-align:center}
+.photo-status{width:100%}
+.status{flex:1;min-width:0;font-size:14px;font-weight:600;border-radius:12px;padding:10px 12px;background:var(--bg);color:var(--muted);display:flex;align-items:center;gap:8px}
+.status.ok{background:var(--accent-soft);color:var(--accent)}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.amount-field{display:flex;flex-direction:column;gap:6px}
+.amount-field label{font-size:13px;font-weight:700;color:var(--muted)}
+.amount-field input{height:64px;border:1px solid var(--line);border-radius:14px;padding:0 16px;background:var(--bg);font-family:var(--font-num);font-weight:700;font-size:32px;width:100%;min-width:0}
+.amount-field input[aria-invalid="true"]{border-color:var(--warn)}
+.note-field{display:flex;flex-direction:column;gap:6px}
+.note-field label{font-size:13px;font-weight:700;color:var(--muted)}
+.note-field input{height:50px;border:1px solid var(--line);border-radius:12px;padding:0 14px;background:var(--bg);font-size:17px;width:100%;min-width:0}
+.chips-wrap{display:flex;flex-direction:column;gap:6px}
+.chips-lbl{font-size:13px;font-weight:700;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:0 16px;min-height:44px;font-family:var(--font-num);font-weight:700;font-size:17px}
+.chip[aria-pressed="true"]{background:var(--primary-bg);color:var(--primary-fg);border-color:var(--primary-bg)}
+.row2{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.row2 .lbl{font-size:15px;font-weight:700}
+.qty{height:52px;display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.qty button{width:52px;height:50px;border:0;background:transparent;display:flex;align-items:center;justify-content:center}
+.qty output{min-width:36px;text-align:center;font-family:var(--font-num);font-weight:700;font-size:20px}
+.newtotal{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px;color:var(--muted)}
+.newtotal b{color:var(--ink);font-size:22px}
+.actions{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.btn{height:58px;border-radius:16px;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0 12px;text-align:center}
+.btn.secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{border:0;background:var(--primary-bg);color:var(--primary-fg)}
+.danger{border:0;background:transparent;color:var(--warn);font-weight:700;min-height:44px}
+/* Total and Add/Cancel stay pinned to the bottom of the sheet so they never need scrolling to. */
+.sheet-foot{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom,0px));margin:0 -16px calc(-20px - env(safe-area-inset-bottom,0px));padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;z-index:2;box-shadow:0 -8px 16px -12px rgba(0,0,0,.25)}
+.sheet-foot .newtotal b{font-size:20px}
+
+/* More menu */
+.menu-list{display:flex;flex-direction:column;gap:10px}
+.menu-item{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:0 16px;font-weight:700;font-size:16px;text-align:left}
+.menu-item svg{flex-shrink:0;color:var(--accent)}
+.menu-item small{display:block;font-weight:600;font-size:13px;color:var(--muted)}
+.menu-item.armed{border-color:var(--warn);color:var(--warn)}
+.sec-lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.themes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.theme-opt{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:700;min-height:76px}
+.theme-opt[aria-pressed="true"]{border-color:var(--accent)}
+.sw{width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,.15);position:relative;overflow:hidden}
+.sw i{position:absolute;right:0;bottom:0;width:50%;height:50%}
+
+/* History */
+.month{display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:var(--accent-soft);color:var(--accent);border-radius:14px;padding:12px 14px;font-weight:700}
+.month b{font-size:22px}
+.trips{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.trip{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.trip-head{width:100%;border:0;background:transparent;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;text-align:left;min-height:60px}
+.trip-date{font-weight:700;font-size:15px}
+.trip-sub{font-size:13px;color:var(--muted)}
+.trip-amt{font-size:19px;font-weight:700;white-space:nowrap}
+.trip-body{border-top:1px dashed var(--line);padding:8px 14px 12px;display:flex;flex-direction:column;gap:4px}
+.trip-row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.trip-row span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.trip-del{align-self:flex-start;border:0;background:transparent;color:var(--warn);font-weight:700;min-height:44px;padding:0}
+.trip-del.armed{text-decoration:underline}
+.hist-empty{color:var(--muted);text-align:center;padding:24px 8px;margin:0}
+
+.live{position:fixed;inset:0;z-index:12;background:#000;color:#fff;display:flex;flex-direction:column}
+.live video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.live-top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,0))}
+.live-round{width:44px;height:44px;border-radius:22px;border:0;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center}
+.live-title{font-weight:800;font-size:16px;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.live-mid{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none}
+.live-read{min-height:52px;padding:6px 18px;border-radius:14px;background:rgba(0,0,0,.6);font-family:var(--font-num);font-weight:700;font-size:34px;letter-spacing:-.01em;display:flex;align-items:center}
+.live-read.idle{font-family:var(--font-body);font-size:16px;font-weight:700}
+.live-frame{position:relative;width:min(86vw,400px);height:min(34vh,280px);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.35)}
+.live-frame i{position:absolute;width:34px;height:34px;border-color:#FFE15A;border-style:solid;border-width:0}
+.live-frame i:nth-child(1){left:0;top:0;border-left-width:4px;border-top-width:4px;border-top-left-radius:16px}
+.live-frame i:nth-child(2){right:0;top:0;border-right-width:4px;border-top-width:4px;border-top-right-radius:16px}
+.live-frame i:nth-child(3){left:0;bottom:0;border-left-width:4px;border-bottom-width:4px;border-bottom-left-radius:16px}
+.live-frame i:nth-child(4){right:0;bottom:0;border-right-width:4px;border-bottom-width:4px;border-bottom-right-radius:16px}
+.live-frame.locked i{border-color:#2BD47D}
+.live-hint{background:rgba(0,0,0,.55);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;text-align:center;max-width:90vw}
+.live-bot{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;padding:14px 20px calc(22px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.6))}
+.live-side{justify-self:start;border:0;background:rgba(0,0,0,.5);color:#fff;border-radius:12px;padding:8px 10px;font-size:13px;font-weight:700;min-height:44px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.live-side small{font-weight:600;opacity:.8}
+.live-shutter{justify-self:center;width:76px;height:76px;border-radius:38px;border:4px solid #fff;background:transparent;padding:5px}
+.live-shutter span{display:block;width:100%;height:100%;border-radius:999px;background:rgba(255,255,255,.85)}
+.live-alt{justify-self:end;border:0;background:rgba(0,0,0,.5);color:#fff;border-radius:12px;padding:0 12px;font-size:14px;font-weight:700;min-height:44px}
+.confirm{position:absolute;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:5;margin:0 auto;max-width:520px;background:var(--surface);color:var(--ink);border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.5);animation:pop .18s ease-out}
+@keyframes pop{from{transform:translateY(16px)}to{transform:none}}
+.live.asking .live-bot,.live.asking .live-hint{visibility:hidden}
+.confirm-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.confirm-q{font-size:15px;font-weight:700;color:var(--muted)}
+.confirm-amt{font-family:var(--font-num);font-size:44px;font-weight:700;line-height:1}
+.confirm img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0;background:var(--chip)}
+.confirm .chips{gap:6px}
+.confirm .chip{min-height:40px;font-size:15px}
+.confirm-actions{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.confirm-actions .btn{height:60px}
+.confirm-edit{border:0;background:transparent;color:var(--accent);font-weight:700;min-height:40px;font-size:14px}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(110px + env(safe-area-inset-bottom,0px));margin:0 auto;max-width:528px;background:#13261F;color:#FFFFFF;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:8px 8px 8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600;font-size:15px;z-index:25;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.toast span{padding:8px 0}
+.toast button,.toast label{border:0;background:transparent;color:#FFE15A;font-weight:800;min-height:40px;padding:0 10px;display:flex;align-items:center;cursor:pointer}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <div class="eyebrow">Total</div>
+      <div class="top-actions">
+        <button id="share" class="icon-btn" type="button" aria-label="Send list" hidden>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+        </button>
+        <button id="openHist" class="icon-btn" type="button" aria-label="Shopping history">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+        </button>
+        <button id="reset" class="reset-btn" type="button" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          <span id="resetTxt">Reset</span>
+        </button>
+        <button id="openMenu" class="icon-btn" type="button" aria-label="More options">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="total" class="total num" aria-live="polite">0</div>
+    <div id="count" class="sub">Scan a price tag to start</div>
+    <div id="bar" class="bar" aria-hidden="true" hidden><span></span></div>
+    <button id="budgetBtn" class="budget-btn none" type="button">Set a budget</button>
+    <div id="alert" class="alert" role="alert" hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <span id="alertTxt"></span>
+    </div>
+  </header>
+
+  <ol id="tape" class="tape" aria-label="Amounts added"></ol>
+
+  <div id="empty" class="empty">
+    <div class="mini-tag" aria-hidden="true">2,450</div>
+    <h2>Scan a price tag</h2>
+    <p>Point the camera at a price. When it reads the same number steadily, it asks you to add it.</p>
+    <button id="emptyHist" class="link" type="button" hidden>See past shopping</button>
+  </div>
+
+  <footer class="foot">
+    <button id="scanBtn" class="scan" type="button">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M7 12h10"/></svg>
+      Scan price
+    </button>
+    <button id="manual" class="type" type="button">Type</button>
+    <input id="cam" type="file" accept="image/*" capture="environment" hidden>
+  </footer>
+</div>
+
+<!-- Live camera: reads prices continuously -->
+<div id="live" class="live" hidden>
+  <video id="liveVideo" playsinline muted autoplay></video>
+  <div class="live-top">
+    <button id="liveClose" class="live-round" type="button" aria-label="Close camera"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="live-title">Point at a price</div>
+    <div style="width:44px"></div>
+  </div>
+  <div class="live-mid">
+    <div id="liveRead" class="live-read idle" aria-live="polite">Starting camera…</div>
+    <div id="liveFrame" class="live-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div id="liveHint" class="live-hint">Fit the price inside the frame and hold steady</div>
+  </div>
+  <div class="live-bot">
+    <button id="liveTotal" class="live-side" type="button"><small>Total</small><span id="liveTotalAmt" class="num">0</span></button>
+    <button id="liveShutter" class="live-shutter" type="button" aria-label="Take photo now and choose the price yourself"><span></span></button>
+    <button id="liveType" class="live-alt" type="button">Type</button>
+  </div>
+  <div id="confirm" class="confirm" role="dialog" aria-modal="true" aria-labelledby="confirmQ" hidden>
+    <div class="confirm-row">
+      <div>
+        <div id="confirmQ" class="confirm-q">Add this price?</div>
+        <div id="confirmAmt" class="confirm-amt">0</div>
+      </div>
+      <img id="confirmImg" alt="The price tag the camera read">
+    </div>
+    <div id="confirmAltWrap" hidden>
+      <div class="chips-lbl" style="margin-bottom:6px">Or tap another number it saw:</div>
+      <div id="confirmAlts" class="chips"></div>
+    </div>
+    <div class="confirm-row">
+      <span class="lbl" id="cQtyLbl" style="font-weight:700">Quantity</span>
+      <div class="qty" role="group" aria-labelledby="cQtyLbl">
+        <button id="cDec" type="button" aria-label="Decrease quantity"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+        <output id="cQty">1</output>
+        <button id="cInc" type="button" aria-label="Increase quantity"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button id="cNo" class="btn secondary" type="button">No</button>
+      <button id="cYes" class="btn primary" type="button">Yes, add</button>
+    </div>
+    <button id="cEdit" class="confirm-edit" type="button">Wrong? Open the photo to choose or type</button>
+  </div>
+</div>
+
+<!-- Add / edit a price -->
+<div id="sheetWrap" class="sheet-wrap" hidden>
+  <button id="scrim" class="scrim" type="button" aria-label="Close"></button>
+  <form id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" novalidate>
+    <div class="sheet-head">
+      <h2 id="sheetTitle">Add price</h2>
+      <label id="retake" class="retake" for="cam" hidden>Retake</label>
+    </div>
+    <div id="photoRow" class="photo-wrap" hidden>
+      <div class="photo-box">
+        <img id="photo" alt="Your photo of the price tag">
+        <div id="overlay" class="overlay" aria-label="Photo. Tap a number, or draw around the price.">
+          <svg id="ink" class="ink" aria-hidden="true"></svg>
+        </div>
+      </div>
+      <div id="status" class="status photo-status" role="status"></div>
+      <p id="photoHint" class="photo-hint" hidden>Wrong number? Tap the right one on the photo, or draw around the price.</p>
+    </div>
+    <div class="amount-field">
+      <label for="fAmt">Price</label>
+      <input id="fAmt" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+    </div>
+    <div id="chipsWrap" class="chips-wrap" hidden>
+      <div class="chips-lbl">Numbers found:</div>
+      <div id="chips" class="chips"></div>
+    </div>
+    <div class="note-field">
+      <label for="fNote">Note (optional)</label>
+      <input id="fNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. milk, rice">
+    </div>
+    <div class="row2">
+      <span class="lbl" id="qtyLbl">Quantity</span>
+      <div class="qty" role="group" aria-labelledby="qtyLbl">
+        <button id="qDec" type="button" aria-label="Decrease quantity"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+        <output id="fQty">1</output>
+        <button id="qInc" type="button" aria-label="Increase quantity"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </div>
+    <button id="remove" class="danger" type="button" hidden>Remove this line</button>
+    <div class="sheet-foot">
+      <div id="sheetWarn" class="sheet-warn" hidden></div>
+      <div class="foot-row">
+        <div class="newtotal"><span>New total</span><b id="newTotal" class="num">0</b></div>
+      </div>
+      <div class="actions">
+        <button id="cancel" class="btn secondary" type="button">Cancel</button>
+        <button id="submit" class="btn primary" type="submit">Add</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Budget -->
+<div id="budWrap" class="sheet-wrap" hidden>
+  <button id="budScrim" class="scrim" type="button" aria-label="Close"></button>
+  <form id="budForm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="budTitle" novalidate>
+    <div class="sheet-head"><h2 id="budTitle">Budget</h2></div>
+    <div class="amount-field">
+      <label for="fBud">How much do you want to spend?</label>
+      <input id="fBud" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 15000">
+    </div>
+    <div class="actions">
+      <button id="budOff" class="btn secondary" type="button">No budget</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</div>
+
+<!-- More menu -->
+<div id="menuWrap" class="sheet-wrap" hidden>
+  <button id="menuScrim" class="scrim" type="button" aria-label="Close"></button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <div class="sheet-head">
+      <h2 id="menuTitle">More</h2>
+      <button id="menuClose" class="close-x" type="button" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="menu-list">
+      <button id="mFinish" class="menu-item" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        <span>Finish shopping<small>Save this trip to history and start a new one</small></span>
+      </button>
+      <button id="mHist" class="menu-item" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+        <span>Shopping history<small>Past trips and this month's spending</small></span>
+      </button>
+    </div>
+    <div class="sec-lbl" id="themeLbl">Colour theme</div>
+    <div class="themes" role="group" aria-labelledby="themeLbl">
+      <button class="theme-opt" type="button" data-pal="auto"><span class="sw" style="background:#F3F5F1"><i style="background:#0D1612"></i></span>Auto</button>
+      <button class="theme-opt" type="button" data-pal="light"><span class="sw" style="background:#F3F5F1"><i style="background:#13261F"></i></span>Light</button>
+      <button class="theme-opt" type="button" data-pal="dark"><span class="sw" style="background:#0D1612"><i style="background:#FFE15A"></i></span>Dark</button>
+      <button class="theme-opt" type="button" data-pal="ocean"><span class="sw" style="background:#0B1E2D"><i style="background:#62CDEB"></i></span>Ocean</button>
+      <button class="theme-opt" type="button" data-pal="rose"><span class="sw" style="background:#FBF3F4"><i style="background:#A93A62"></i></span>Rose</button>
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div id="histWrap" class="sheet-wrap" hidden>
+  <button id="histScrim" class="scrim" type="button" aria-label="Close"></button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="histTitle">
+    <div class="sheet-head">
+      <h2 id="histTitle">Shopping history</h2>
+      <button id="histClose" class="close-x" type="button" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div id="month" class="month"><span id="monthLbl">This month</span><b id="monthAmt" class="num">0</b></div>
+    <ul id="trips" class="trips"></ul>
+    <p id="histEmpty" class="hist-empty">No saved trips yet. When you finish shopping, tap the ••• button and choose Finish shopping.</p>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" hidden><span id="toastMsg"></span><button id="toastAct" type="button" hidden>Undo</button></div>
+
+<script type="text/plain" id="ppw">
+/* Price reader worker: PaddleOCR (PP-OCRv4) running on the phone with onnxruntime-web. */
+let RT = null, det = null, rec = null, dict = null;
+
+self.onmessage = async (e) => {
+  const msg = e.data || {};
+  try {
+    if (msg.type === 'init') {
+      await init(msg.base);
+      self.postMessage({ id: msg.id, ok: true });
+    } else if (msg.type === 'read') {
+      const lines = await readImage(msg.img);
+      self.postMessage({ id: msg.id, ok: true, lines });
+    }
+  } catch (err) {
+    self.postMessage({ id: msg.id, ok: false, error: String((err && err.message) || err) });
+  }
+};
+
+async function fetchBuf(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('download failed ' + r.status + ' ' + url);
+  return new Uint8Array(await r.arrayBuffer());
+}
+
+async function init(base) {
+  if (det && rec) return;
+  if (!self.ort) importScripts(base.ortScript);
+  RT = self.ort;
+  RT.env.wasm.numThreads = 1;
+  RT.env.wasm.proxy = false;
+  RT.env.wasm.wasmPaths = base.ortWasm;
+  const [d, r, k] = await Promise.all([
+    fetchBuf(base.det),
+    fetchBuf(base.rec),
+    fetch(base.dict).then((x) => { if (!x.ok) throw new Error('dict ' + x.status); return x.text(); })
+  ]);
+  const opts = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
+  det = await RT.InferenceSession.create(d, opts);
+  rec = await RT.InferenceSession.create(r, opts);
+  const chars = k.split(/\r?\n/).filter((c) => c.length > 0);
+  dict = ['blank'].concat(chars, [' ']);
+}
+
+/* ---------- helpers ---------- */
+function sampler(img) {
+  const { data, w, h } = img;
+  return function (x, y, out) {
+    if (x < 0) x = 0; if (y < 0) y = 0;
+    if (x > w - 1) x = w - 1; if (y > h - 1) y = h - 1;
+    const x0 = Math.floor(x), y0 = Math.floor(y);
+    const x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(h - 1, y0 + 1);
+    const fx = x - x0, fy = y - y0;
+    const i00 = (y0 * w + x0) * 4, i10 = (y0 * w + x1) * 4, i01 = (y1 * w + x0) * 4, i11 = (y1 * w + x1) * 4;
+    for (let c = 0; c < 3; c++) {
+      const a = data[i00 + c] * (1 - fx) + data[i10 + c] * fx;
+      const b = data[i01 + c] * (1 - fx) + data[i11 + c] * fx;
+      out[c] = a * (1 - fy) + b * fy;
+    }
+    return out;
+  };
+}
+
+function convexHull(pts) {
+  pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [];
+  for (const p of pts) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); }
+  const upper = [];
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); }
+  upper.pop(); lower.pop();
+  return lower.concat(upper);
+}
+
+// Smallest rotated rectangle around a set of points.
+function minAreaRect(points) {
+  const hull = convexHull(points);
+  if (hull.length < 3) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of points) { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); }
+    return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, ux: 1, uy: 0, a: x1 - x0 + 1, b: y1 - y0 + 1 };
+  }
+  let best = null;
+  for (let i = 0; i < hull.length; i++) {
+    const p = hull[i], q = hull[(i + 1) % hull.length];
+    let ux = q[0] - p[0], uy = q[1] - p[1];
+    const len = Math.hypot(ux, uy);
+    if (len === 0) continue;
+    ux /= len; uy /= len;
+    const vx = -uy, vy = ux;
+    let minU = Infinity, maxU = -Infinity, minV = Infinity, maxV = -Infinity;
+    for (const r of hull) {
+      const pu = r[0] * ux + r[1] * uy, pv = r[0] * vx + r[1] * vy;
+      if (pu < minU) minU = pu; if (pu > maxU) maxU = pu;
+      if (pv < minV) minV = pv; if (pv > maxV) maxV = pv;
+    }
+    const area = (maxU - minU) * (maxV - minV);
+    if (!best || area < best.area) {
+      const cu = (minU + maxU) / 2, cv = (minV + maxV) / 2;
+      best = { area, cx: cu * ux + cv * vx, cy: cu * uy + cv * vy, ux, uy, a: maxU - minU + 1, b: maxV - minV + 1 };
+    }
+  }
+  return best;
+}
+
+/* ---------- detection ---------- */
+async function detect(img) {
+  const { w, h } = img;
+  let ratio = 1;
+  const minSide = Math.min(w, h);
+  if (minSide < 640) ratio = 640 / minSide;
+  let rw = w * ratio, rh = h * ratio;
+  const cap = 960;
+  if (Math.max(rw, rh) > cap) { const s = cap / Math.max(rw, rh); rw *= s; rh *= s; }
+  rw = Math.max(32, Math.round(rw / 32) * 32);
+  rh = Math.max(32, Math.round(rh / 32) * 32);
+  const sx = w / rw, sy = h / rh;
+  const mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225];
+  const plane = rw * rh;
+  const t = new Float32Array(3 * plane);
+  const get = sampler(img), px = [0, 0, 0];
+  for (let y = 0; y < rh; y++) {
+    for (let x = 0; x < rw; x++) {
+      get((x + 0.5) * sx - 0.5, (y + 0.5) * sy - 0.5, px);
+      const i = y * rw + x;
+      // BGR channel order, as the model was trained with OpenCV images.
+      t[i] = (px[2] / 255 - mean[0]) / std[0];
+      t[plane + i] = (px[1] / 255 - mean[1]) / std[1];
+      t[2 * plane + i] = (px[0] / 255 - mean[2]) / std[2];
+    }
+  }
+  const out = await det.run({ [det.inputNames[0]]: new RT.Tensor('float32', t, [1, 3, rh, rw]) });
+  const prob = out[det.outputNames[0]].data;
+
+  // Threshold, dilate a little, then group touching pixels into text regions.
+  const bin = new Uint8Array(plane);
+  for (let i = 0; i < plane; i++) bin[i] = prob[i] > 0.3 ? 1 : 0;
+  const dil = new Uint8Array(plane);
+  for (let y = 0; y < rh; y++) {
+    for (let x = 0; x < rw; x++) {
+      const i = y * rw + x;
+      dil[i] = bin[i] || (x + 1 < rw && bin[i + 1]) || (y + 1 < rh && bin[i + rw]) || (x + 1 < rw && y + 1 < rh && bin[i + rw + 1]) ? 1 : 0;
+    }
+  }
+  const seen = new Uint8Array(plane);
+  const boxes = [];
+  const stack = new Int32Array(plane);
+  for (let s = 0; s < plane; s++) {
+    if (!dil[s] || seen[s]) continue;
+    let sp = 0;
+    stack[sp++] = s;
+    seen[s] = 1;
+    const pts = [];
+    let sum = 0, n = 0;
+    while (sp) {
+      const i = stack[--sp];
+      const x = i % rw, y = (i - x) / rw;
+      pts.push([x, y]);
+      sum += prob[i]; n++;
+      if (x > 0 && dil[i - 1] && !seen[i - 1]) { seen[i - 1] = 1; stack[sp++] = i - 1; }
+      if (x + 1 < rw && dil[i + 1] && !seen[i + 1]) { seen[i + 1] = 1; stack[sp++] = i + 1; }
+      if (y > 0 && dil[i - rw] && !seen[i - rw]) { seen[i - rw] = 1; stack[sp++] = i - rw; }
+      if (y + 1 < rh && dil[i + rw] && !seen[i + rw]) { seen[i + rw] = 1; stack[sp++] = i + rw; }
+    }
+    if (n < 12) continue;
+    const score = sum / n;
+    if (score < 0.5) continue;
+    const r = minAreaRect(pts);
+    if (Math.min(r.a, r.b) < 3) continue;
+    // Grow the region (PaddleOCR "unclip"), since the detector marks a shrunken text core.
+    const d = (r.a * r.b * 1.6) / (2 * (r.a + r.b));
+    r.a += 2 * d; r.b += 2 * d;
+    if (Math.min(r.a, r.b) < 5) continue;
+    // Back to original image coordinates.
+    const scaleX = sx, scaleY = sy;
+    const ex = { x: r.ux * r.a / 2, y: r.uy * r.a / 2 };
+    const ey = { x: -r.uy * r.b / 2, y: r.ux * r.b / 2 };
+    const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([p, q]) => [
+      (r.cx + p * ex.x + q * ey.x + 0.5) * scaleX - 0.5,
+      (r.cy + p * ex.y + q * ey.y + 0.5) * scaleY - 0.5
+    ]);
+    boxes.push({ corners, score, area: r.a * r.b });
+  }
+  boxes.sort((p, q) => q.area - p.area);
+  return boxes.slice(0, 24);
+}
+
+/* ---------- recognition ---------- */
+async function recognize(img, box) {
+  // Long side of the box is the reading direction, going left to right.
+  const c = box.corners;
+  const e1 = [c[1][0] - c[0][0], c[1][1] - c[0][1]];
+  const e2 = [c[3][0] - c[0][0], c[3][1] - c[0][1]];
+  let L1 = Math.hypot(e1[0], e1[1]), L2 = Math.hypot(e2[0], e2[1]);
+  let u = e1, v = e2, lenU = L1, lenV = L2;
+  if (L2 > L1) { u = e2; v = e1; lenU = L2; lenV = L1; }
+  let ux = u[0] / lenU, uy = u[1] / lenU;
+  if (ux < 0 || (ux === 0 && uy < 0)) { ux = -ux; uy = -uy; }
+  let vx = -uy, vy = ux; // points "down" for left-to-right text
+  const cx = (c[0][0] + c[2][0]) / 2, cy = (c[0][1] + c[2][1]) / 2;
+  const ox = cx - ux * lenU / 2 - vx * lenV / 2;
+  const oy = cy - uy * lenU / 2 - vy * lenV / 2;
+  const H = 48;
+  const W = Math.max(8, Math.min(48 * 20, Math.ceil(H * lenU / Math.max(1, lenV))));
+  const imgW = Math.max(320, W);
+  const plane = H * imgW;
+  const t = new Float32Array(3 * plane);
+  const get = sampler(img), px = [0, 0, 0];
+  for (let y = 0; y < H; y++) {
+    const fv = (y + 0.5) * lenV / H;
+    for (let x = 0; x < W; x++) {
+      const fu = (x + 0.5) * lenU / W;
+      get(ox + ux * fu + vx * fv - 0.5, oy + uy * fu + vy * fv - 0.5, px);
+      const i = y * imgW + x;
+      t[i] = (px[2] / 255 - 0.5) / 0.5;
+      t[plane + i] = (px[1] / 255 - 0.5) / 0.5;
+      t[2 * plane + i] = (px[0] / 255 - 0.5) / 0.5;
+    }
+  }
+  const out = await rec.run({ [rec.inputNames[0]]: new RT.Tensor('float32', t, [1, 3, H, imgW]) });
+  const o = out[rec.outputNames[0]];
+  const [, T, C] = o.dims;
+  const p = o.data;
+  let text = '', confSum = 0, confN = 0, last = -1;
+  for (let s = 0; s < T; s++) {
+    let bi = 0, bv = -Infinity;
+    const off = s * C;
+    for (let k = 0; k < C; k++) { const val = p[off + k]; if (val > bv) { bv = val; bi = k; } }
+    if (bi !== 0 && bi !== last) { text += dict[bi] || ''; confSum += bv; confN++; }
+    last = bi;
+  }
+  return { text, conf: confN ? confSum / confN : 0 };
+}
+
+async function readImage(img) {
+  const boxes = await detect(img);
+  const lines = [];
+  for (const b of boxes) {
+    const r = await recognize(img, b);
+    if (!r.text) continue;
+    const xs = b.corners.map((q) => q[0]), ys = b.corners.map((q) => q[1]);
+    const e1 = Math.hypot(b.corners[1][0] - b.corners[0][0], b.corners[1][1] - b.corners[0][1]);
+    const e2 = Math.hypot(b.corners[3][0] - b.corners[0][0], b.corners[3][1] - b.corners[0][1]);
+    lines.push({
+      text: r.text,
+      conf: r.conf,
+      height: Math.min(e1, e2),
+      bbox: { x0: Math.min.apply(null, xs), y0: Math.min.apply(null, ys), x1: Math.max.apply(null, xs), y1: Math.max.apply(null, ys) }
+    });
+  }
+  return lines;
+}
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" async></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const KEY = 'trolley-calc.v1';
+  const HIST_KEY = 'trolley-calc.history.v1';
+  const THEME_KEY = 'trolley-calc.theme.v1';
+
+  let state = { lines: [], nextId: 1, budget: 0 };
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (s && Array.isArray(s.lines)) state = s;
+  } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+  let history = [];
+  try {
+    const h = JSON.parse(localStorage.getItem(HIST_KEY) || 'null');
+    if (Array.isArray(h)) history = h;
+  } catch (e) {}
+  const saveHistory = () => { try { localStorage.setItem(HIST_KEY, JSON.stringify(history)); } catch (e) {} };
+
+  /* ---------- Theme ---------- */
+  let palette = 'auto';
+  try { palette = localStorage.getItem(THEME_KEY) || 'auto'; } catch (e) {}
+  function applyTheme(p) {
+    palette = p;
+    if (p === 'auto') document.documentElement.removeAttribute('data-palette');
+    else document.documentElement.setAttribute('data-palette', p);
+    try { localStorage.setItem(THEME_KEY, p); } catch (e) {}
+    document.querySelectorAll('.theme-opt').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pal === p)));
+  }
+  applyTheme(palette);
+
+  const num = (v) => {
+    const n = parseFloat(String(v == null ? '' : v).replace(/,/g, '').replace(/[^0-9.]/g, ''));
+    return isFinite(n) ? n : 0;
+  };
+  const fmt = (n) => {
+    const r = Math.round(n * 100) / 100;
+    return r.toLocaleString('en-US', Number.isInteger(r) ? { maximumFractionDigits: 0 } : { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  const numStr = (v) => (Number.isInteger(v) ? String(v) : (Math.round(v * 100) / 100).toFixed(2));
+  const totalOf = () => state.lines.reduce((a, l) => a + l.price * l.qty, 0);
+  const NEAR = 0.8; // warn when 80% of the budget is used
+  function budgetLevel(total) {
+    const bud = num(state.budget);
+    if (!(bud > 0)) return 'none';
+    if (total > bud) return 'over';
+    if (total >= bud * NEAR) return 'near';
+    return 'ok';
+  }
+
+  /* ---------- Number reader (runs on the phone) ---------- */
+  // Main reader: PaddleOCR in a background worker. Backup: Tesseract, if PaddleOCR cannot start.
+  let worker = null;          // the engine in use, once ready
+  let workerPromise = null;
+  const fileUrl = (p) => new URL(p, document.baseURI).href;
+  const OCR_BASE = {
+    ortScript: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.wasm.min.js',
+    ortWasm: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/',
+    det: 'https://cdn.jsdelivr.net/npm/@gutenye/ocr-models@1.4.2/assets/ch_PP-OCRv4_det_infer.onnx',
+    rec: 'https://cdn.jsdelivr.net/npm/@gutenye/ocr-models@1.4.2/assets/ch_PP-OCRv4_rec_infer.onnx',
+    dict: 'https://cdn.jsdelivr.net/npm/@gutenye/ocr-models@1.4.2/assets/ppocr_keys_v1.txt'
+  };
+
+  function startPaddle() {
+    return new Promise((resolve, reject) => {
+      let w;
+      try {
+        const src = document.getElementById('ppw').textContent;
+        w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+      } catch (e) { reject(e); return; }
+      let seq = 0;
+      const waiting = new Map();
+      w.onmessage = (e) => {
+        const m = e.data || {};
+        const cb = waiting.get(m.id);
+        if (!cb) return;
+        waiting.delete(m.id);
+        if (m.ok) cb.res(m); else cb.rej(new Error(m.error || 'reader error'));
+      };
+      w.onerror = (e) => { waiting.forEach((cb) => cb.rej(new Error('reader crashed'))); waiting.clear(); reject(e); };
+      const call = (msg, transfer) => new Promise((res, rej) => {
+        const id = ++seq;
+        waiting.set(id, { res, rej });
+        w.postMessage(Object.assign({ id }, msg), transfer || []);
+      });
+      call({ type: 'init', base: OCR_BASE }).then(() => {
+        resolve({
+          kind: 'paddle',
+          async read(canvas) {
+            const ctx = canvas.getContext('2d');
+            const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const buf = id.data.buffer.slice(0);
+            const r = await call({ type: 'read', img: { data: new Uint8ClampedArray(buf), w: canvas.width, h: canvas.height } });
+            return r.lines || [];
+          }
+        });
+      }, (e) => { try { w.terminate(); } catch (x) {} reject(e); });
+    });
+  }
+
+  async function waitForLib() {
+    for (let i = 0; i < 150 && !window.Tesseract; i++) await new Promise((r) => setTimeout(r, 100));
+    if (!window.Tesseract) throw new Error('reader did not load');
+    return window.Tesseract;
+  }
+  async function startTesseract() {
+    const T = await waitForLib();
+    const w = await T.createWorker('eng', 1);
+    await w.setParameters({ tessedit_pageseg_mode: '11' });
+    return {
+      kind: 'tesseract',
+      async read(canvas) {
+        const r = await w.recognize(canvas);
+        const words = (r && r.data && r.data.words) || [];
+        return words.map((x) => ({
+          text: String(x.text || ''),
+          conf: (typeof x.confidence === 'number' ? x.confidence : 50) / 100,
+          height: x.bbox ? x.bbox.y1 - x.bbox.y0 : 10,
+          bbox: x.bbox || null
+        }));
+      }
+    };
+  }
+
+  function getReader() {
+    if (worker) return Promise.resolve(worker);
+    if (!workerPromise) {
+      workerPromise = startPaddle()
+        .catch((e) => { try { console.warn('PaddleOCR unavailable, using backup reader:', e && e.message ? e.message : e); } catch (x) {} return startTesseract(); })
+        .then((eng) => { worker = eng; document.documentElement.dataset.reader = eng.kind; return eng; })
+        .catch((e) => { workerPromise = null; throw e; });
+    }
+    return workerPromise;
+  }
+  // Start loading straight away so the first scan is quick.
+  setTimeout(() => { getReader().catch(() => {}); }, 300);
+
+  // Turn read text into price candidates with where they sit on the photo.
+  function candidatesFromLines(lines) {
+    const out = [];
+    lines.forEach((l) => {
+      String(l.text || '').split(/\s+/).forEach((tok) => {
+        let raw = tok;
+        if (!/\d/.test(raw)) return;
+        if (/\d\s*[\/:]\s*\d/.test(raw.replace(/\/-$/, ''))) return; // dates and times, e.g. 12/09/26
+        if (/%/.test(raw)) return;                                      // discounts like 20%
+        if (/\d\s*-\s*\d/.test(raw)) return;                            // product codes like 9876-5432-10
+        if (/\d\s*(ml|ltr|kg|gm|g|l|mg|cm|mm|pcs|pc)\b/i.test(raw)) return; // sizes, e.g. 100ml, 5KG
+        raw = raw.replace(/(\d)[oO](?=\d|\b)/g, '$10');
+        raw = raw.replace(/(\d),(\d{2})$/, '$1.$2').replace(/,/g, '');
+        const parts = raw.match(/\d+(?:\.\d{1,2})?/g) || [];
+        parts.forEach((p) => {
+          const digits = p.replace('.', '');
+          if (digits.length < 2 || digits.length > 6) return; // too short, or a barcode / item code
+          const value = parseFloat(p);
+          if (!(value >= 1 && value <= 500000)) return;
+          out.push({ value, score: (l.height || 10) * (0.5 + (l.conf || 0.5)), bbox: l.bbox || null });
+        });
+      });
+    });
+    return out;
+  }
+  // Keep the best entry per value, best first.
+  function mergeCandidates(lists, limit) {
+    const best = new Map();
+    lists.forEach((list) => list.forEach((c) => {
+      const prev = best.get(c.value);
+      if (!prev || c.score > prev.score) best.set(c.value, c);
+    }));
+    // When two readings sit on the same spot (e.g. "1000" and "100"), keep the one with more digits.
+    const sorted = Array.from(best.values()).sort((a, b) => b.score - a.score);
+    const area = (q) => Math.max(1, (q.x1 - q.x0) * (q.y1 - q.y0));
+    const overlap = (p, q) => {
+      const w = Math.min(p.x1, q.x1) - Math.max(p.x0, q.x0);
+      const h = Math.min(p.y1, q.y1) - Math.max(p.y0, q.y0);
+      return w > 0 && h > 0 ? (w * h) / Math.min(area(p), area(q)) : 0;
+    };
+    const digitsOf = (c) => String(c.value).replace('.', '').length;
+    const kept = [];
+    sorted.forEach((c) => {
+      const clash = kept.findIndex((k) => c.bbox && k.bbox && overlap(c.bbox, k.bbox) > 0.5);
+      if (clash < 0) { kept.push(c); return; }
+      if (digitsOf(c) > digitsOf(kept[clash])) kept[clash] = Object.assign({}, c, { score: Math.max(c.score, kept[clash].score) });
+    });
+    return kept.sort((a, b) => b.score - a.score).slice(0, limit || 6);
+  }
+
+  // Read a whole photo.
+  async function readColorCanvas(eng, color) {
+    const lines = await eng.read(color);
+    return mergeCandidates([candidatesFromLines(lines)]);
+  }
+
+  // Read only the part of the photo the shopper drew around.
+  async function readRegion(eng, color, rect) {
+    const padX = rect.w * 0.08 + 4, padY = rect.h * 0.12 + 4;
+    const x0 = Math.max(0, Math.floor(rect.x - padX));
+    const y0 = Math.max(0, Math.floor(rect.y - padY));
+    const x1 = Math.min(color.width, Math.ceil(rect.x + rect.w + padX));
+    const y1 = Math.min(color.height, Math.ceil(rect.y + rect.h + padY));
+    const cw = Math.max(1, x1 - x0), ch = Math.max(1, y1 - y0);
+    const scale = Math.max(1, Math.min(4, 800 / Math.max(cw, ch)));
+    const c = document.createElement('canvas');
+    c.width = Math.round(cw * scale);
+    c.height = Math.round(ch * scale);
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(color, x0, y0, cw, ch, 0, 0, c.width, c.height);
+    const list = await readColorCanvas(eng, c);
+    // Map boxes back onto the full photo.
+    return list.map((cand) => Object.assign({}, cand, {
+      bbox: cand.bbox ? {
+        x0: x0 + cand.bbox.x0 / scale, y0: y0 + cand.bbox.y0 / scale,
+        x1: x0 + cand.bbox.x1 / scale, y1: y0 + cand.bbox.y1 / scale
+      } : null
+    }));
+  }
+
+  async function loadImage(file) {
+    const url = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => rej(r.error);
+      r.readAsDataURL(file);
+    });
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    // Smaller copy: faster, and plenty of detail for price tags.
+    const s = Math.min(1, 1000 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * s));
+    c.height = Math.max(1, Math.round(img.naturalHeight * s));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const preview = c.toDataURL('image/jpeg', 0.75);
+    let thumb = '';
+    try {
+      const t = document.createElement('canvas');
+      const side = 96;
+      const sq = Math.min(img.naturalWidth, img.naturalHeight);
+      t.width = side; t.height = side;
+      t.getContext('2d').drawImage(img, (img.naturalWidth - sq) / 2, (img.naturalHeight - sq) / 2, sq, sq, 0, 0, side, side);
+      thumb = t.toDataURL('image/jpeg', 0.5);
+    } catch (e) {}
+    return { color: c, preview, thumb };
+  }
+
+  /* ---------- Sheet ---------- */
+  const sheet = { mode: 'manual', id: null, qty: 1, token: 0, typed: false, thumb: '', img: null, cands: [], drawn: null, busy: false };
+
+  function setStatus(text, kind) {
+    const el = $('status');
+    el.className = 'status' + (kind && kind !== 'busy' ? ' ' + kind : '');
+    el.textContent = '';
+    if (kind === 'busy') {
+      const s = document.createElement('span');
+      s.className = 'spin';
+      s.setAttribute('aria-hidden', 'true');
+      el.appendChild(s);
+    }
+    el.appendChild(document.createTextNode(text));
+  }
+
+  function openSheet(mode, id) {
+    sheet.mode = mode;
+    sheet.id = id || null;
+    sheet.typed = false;
+    sheet.thumb = '';
+    sheet.img = null;
+    sheet.cands = [];
+    sheet.drawn = null;
+    sheet.busy = false;
+    sheet.token++;
+    clearOverlay();
+    const line = mode === 'edit' ? state.lines.find((l) => l.id === id) : null;
+    $('fAmt').value = line ? String(line.price) : '';
+    $('fNote').value = line && line.note ? line.note : '';
+    $('fAmt').removeAttribute('aria-invalid');
+    sheet.qty = line ? line.qty : 1;
+    $('sheetTitle').textContent = mode === 'edit' ? 'Edit line' : 'Add price';
+    $('submit').textContent = mode === 'edit' ? 'Save' : 'Add';
+    $('remove').hidden = mode !== 'edit';
+    $('photoRow').hidden = mode !== 'scan';
+    $('retake').hidden = mode !== 'scan';
+    $('chipsWrap').hidden = true;
+    $('photoHint').hidden = true;
+    $('sheetWrap').hidden = false;
+    update();
+    if (mode !== 'scan') setTimeout(() => $('fAmt').focus(), 50);
+  }
+  function closeSheet() { sheet.token++; $('sheetWrap').hidden = true; }
+
+  function update() {
+    $('fQty').textContent = String(sheet.qty);
+    let base = totalOf();
+    if (sheet.mode === 'edit') {
+      const l = state.lines.find((x) => x.id === sheet.id);
+      if (l) base -= l.price * l.qty;
+    }
+    const after = base + num($('fAmt').value) * sheet.qty;
+    $('newTotal').textContent = fmt(after);
+    const lvl = num($('fAmt').value) > 0 ? budgetLevel(after) : 'none';
+    const bud = num(state.budget);
+    const sw = $('sheetWarn');
+    if (lvl === 'over') {
+      sw.className = 'sheet-warn over';
+      sw.textContent = 'This puts you over budget by ' + fmt(after - bud);
+      sw.hidden = false;
+    } else if (lvl === 'near') {
+      sw.className = 'sheet-warn near';
+      sw.textContent = 'Close to budget: only ' + fmt(bud - after) + ' left after this';
+      sw.hidden = false;
+    } else {
+      sw.hidden = true;
+    }
+    const cur = num($('fAmt').value);
+    Array.from($('chips').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === cur)));
+    $('overlay').querySelectorAll('.nb').forEach((b) => b.classList.toggle('sel', num(b.dataset.v) === cur));
+  }
+
+  function pickValue(v) {
+    $('fAmt').value = numStr(v);
+    $('fAmt').removeAttribute('aria-invalid');
+    sheet.typed = true;
+    update();
+  }
+
+  function showChips(list) {
+    const box = $('chips');
+    box.textContent = '';
+    list.forEach((v) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.v = String(v);
+      b.textContent = fmt(v);
+      b.addEventListener('click', () => pickValue(v));
+      box.appendChild(b);
+    });
+    $('chipsWrap').hidden = list.length < 2;
+    update();
+  }
+
+  /* ---------- Photo: outlines you can tap, and drawing around a price ---------- */
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function clearOverlay() {
+    const ov = $('overlay');
+    ov.querySelectorAll('.nb').forEach((n) => n.remove());
+    $('ink').textContent = '';
+  }
+  function drawBoxes() {
+    const ov = $('overlay');
+    ov.querySelectorAll('.nb').forEach((n) => n.remove());
+    if (!sheet.img) return;
+    const W = sheet.img.color.width, H = sheet.img.color.height;
+    sheet.cands.forEach((c) => {
+      if (!c.bbox) return;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'nb';
+      b.dataset.v = String(c.value);
+      b.setAttribute('aria-label', 'Use ' + fmt(c.value));
+      b.style.left = (c.bbox.x0 / W) * 100 + '%';
+      b.style.top = (c.bbox.y0 / H) * 100 + '%';
+      b.style.width = ((c.bbox.x1 - c.bbox.x0) / W) * 100 + '%';
+      b.style.height = ((c.bbox.y1 - c.bbox.y0) / H) * 100 + '%';
+      b.addEventListener('pointerdown', (e) => e.stopPropagation());
+      b.addEventListener('click', (e) => { e.stopPropagation(); pickValue(c.value); });
+      ov.appendChild(b);
+    });
+    update();
+  }
+  function showDrawnRect() {
+    const ink = $('ink');
+    ink.textContent = '';
+    if (!sheet.drawn || !sheet.img) return;
+    const W = sheet.img.color.width, H = sheet.img.color.height;
+    ink.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    ink.setAttribute('preserveAspectRatio', 'none');
+    const r = document.createElementNS(SVGNS, 'rect');
+    r.setAttribute('x', sheet.drawn.x); r.setAttribute('y', sheet.drawn.y);
+    r.setAttribute('width', sheet.drawn.w); r.setAttribute('height', sheet.drawn.h);
+    r.setAttribute('rx', 8);
+    r.setAttribute('vector-effect', 'non-scaling-stroke');
+    ink.appendChild(r);
+  }
+
+  async function readDrawn(rect) {
+    if (!sheet.img) return;
+    const token = sheet.token;
+    sheet.drawn = rect;
+    showDrawnRect();
+    $('overlay').querySelectorAll('.nb').forEach((n) => n.classList.add('dim'));
+    setStatus('Reading the area you marked…', 'busy');
+    try {
+      const w = await getReader();
+      if (token !== sheet.token) return;
+      const list = await readRegion(w, sheet.img.color, rect);
+      if (token !== sheet.token) return;
+      if (list.length) {
+        sheet.cands = list;
+        pickValue(list[0].value);
+        sheet.typed = false;
+        drawBoxes();
+        showDrawnRect();
+        showChips(list.map((c) => c.value));
+        setStatus('Read from the area you marked. Check it matches.', 'ok');
+      } else {
+        setStatus('No number in that area. Draw around it again, or type it.', 'warn');
+      }
+    } catch (e) {
+      if (token !== sheet.token) return;
+      setStatus('Could not read that area. Type the price.', 'warn');
+    }
+  }
+
+  (function wireDrawing() {
+    const ov = $('overlay');
+    let pts = null;
+    let line = null;
+    const toImg = (e) => {
+      const r = ov.getBoundingClientRect();
+      const W = sheet.img ? sheet.img.color.width : r.width;
+      const H = sheet.img ? sheet.img.color.height : r.height;
+      return {
+        x: Math.max(0, Math.min(W, ((e.clientX - r.left) / r.width) * W)),
+        y: Math.max(0, Math.min(H, ((e.clientY - r.top) / r.height) * H)),
+        sx: e.clientX, sy: e.clientY
+      };
+    };
+    ov.addEventListener('pointerdown', (e) => {
+      if (!sheet.img) return;
+      e.preventDefault();
+      try { ov.setPointerCapture(e.pointerId); } catch (err) {}
+      pts = [toImg(e)];
+      const ink = $('ink');
+      ink.textContent = '';
+      ink.setAttribute('viewBox', '0 0 ' + sheet.img.color.width + ' ' + sheet.img.color.height);
+      ink.setAttribute('preserveAspectRatio', 'none');
+      line = document.createElementNS(SVGNS, 'polyline');
+      line.setAttribute('vector-effect', 'non-scaling-stroke');
+      ink.appendChild(line);
+    });
+    ov.addEventListener('pointermove', (e) => {
+      if (!pts) return;
+      e.preventDefault();
+      pts.push(toImg(e));
+      line.setAttribute('points', pts.map((p) => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' '));
+    });
+    const end = (e) => {
+      if (!pts) return;
+      const p = pts;
+      pts = null;
+      const xs = p.map((q) => q.x), ys = p.map((q) => q.y);
+      const moved = Math.hypot(p[p.length - 1].sx - p[0].sx, p[p.length - 1].sy - p[0].sy);
+      const spanX = Math.max.apply(null, xs) - Math.min.apply(null, xs);
+      const spanY = Math.max.apply(null, ys) - Math.min.apply(null, ys);
+      if (p.length < 3 || (moved < 12 && spanX < 12 && spanY < 12)) {
+        // A tap, not a drawing: pick the nearest outlined number, if any.
+        $('ink').textContent = '';
+        if (sheet.drawn) showDrawnRect();
+        let best = null, bestD = Infinity;
+        sheet.cands.forEach((c) => {
+          if (!c.bbox) return;
+          const cx = Math.max(c.bbox.x0, Math.min(p[0].x, c.bbox.x1));
+          const cy = Math.max(c.bbox.y0, Math.min(p[0].y, c.bbox.y1));
+          const d = Math.hypot(cx - p[0].x, cy - p[0].y);
+          if (d < bestD) { bestD = d; best = c; }
+        });
+        if (best && bestD < 40) pickValue(best.value);
+        return;
+      }
+      readDrawn({ x: Math.min.apply(null, xs), y: Math.min.apply(null, ys), w: Math.max(8, spanX), h: Math.max(8, spanY) });
+    };
+    ov.addEventListener('pointerup', end);
+    ov.addEventListener('pointercancel', () => { pts = null; $('ink').textContent = ''; if (sheet.drawn) showDrawnRect(); });
+  })();
+
+  async function scanFile(file) {
+    openSheet('scan');
+    const token = sheet.token;
+    $('photo').removeAttribute('src');
+    setStatus('Reading…', 'busy');
+    let img;
+    try {
+      img = await loadImage(file);
+    } catch (e) {
+      setStatus('Could not open the photo. Type the price.', 'warn');
+      return;
+    }
+    if (token !== sheet.token) return;
+    return scanPrepared(img, token);
+  }
+
+  async function scanPrepared(img, token) {
+    if (token == null) {
+      openSheet('scan');
+      token = sheet.token;
+      setStatus('Reading…', 'busy');
+    }
+    sheet.img = img;
+    $('photo').src = img.preview;
+    sheet.thumb = img.thumb || '';
+    try {
+      if (!worker) setStatus('Getting ready (first scan only)…', 'busy');
+      const w = await getReader();
+      if (token !== sheet.token) return;
+      setStatus('Reading…', 'busy');
+      const list = await readColorCanvas(w, img.color);
+      if (token !== sheet.token) return;
+      sheet.cands = list;
+      drawBoxes();
+      $('photoHint').hidden = false;
+      if (list.length) {
+        if (!sheet.typed) $('fAmt').value = numStr(list[0].value);
+        setStatus('Check the number matches the tag.', 'ok');
+        showChips(list.map((c) => c.value));
+      } else {
+        setStatus('No price found. Draw around the price on the photo, or type it.', 'warn');
+      }
+    } catch (e) {
+      if (token !== sheet.token) return;
+      setStatus('Reader could not start. Type the price.', 'warn');
+    }
+    update();
+  }
+
+  function submit(ev) {
+    ev.preventDefault();
+    const price = num($('fAmt').value);
+    if (!(price > 0)) {
+      $('fAmt').setAttribute('aria-invalid', 'true');
+      $('fAmt').focus();
+      return;
+    }
+    const note = $('fNote').value.trim().slice(0, 40);
+    if (sheet.mode === 'edit') {
+      const l = state.lines.find((x) => x.id === sheet.id);
+      if (l) { l.price = price; l.qty = sheet.qty; l.note = note; }
+      closeSheet();
+      commit();
+      return;
+    }
+    const wasScan = sheet.mode === 'scan';
+    state.lines.push({ id: state.nextId++, price, qty: sheet.qty, note, thumb: sheet.thumb || '' });
+    closeSheet();
+    commit();
+    toast('Added ' + fmt(price * sheet.qty), wasScan ? { label: 'Scan next', fn: openLive } : null);
+    const tape = $('tape');
+    tape.scrollTop = tape.scrollHeight;
+  }
+
+  /* ---------- Toast ---------- */
+  let toastTimer = null, toastFn = null;
+  function toast(msg, action) {
+    clearTimeout(toastTimer);
+    if (pendingAlert) { msg = pendingAlert; pendingAlert = ''; }
+    $('toastMsg').textContent = msg;
+    const old = $('toastAct');
+    // "Scan next" must be a label for the camera input so the phone opens the camera.
+    const el = action && action.scan ? document.createElement('label') : document.createElement('button');
+    el.id = 'toastAct';
+    if (action && action.scan) el.htmlFor = 'cam'; else el.type = 'button';
+    el.textContent = action ? action.label : '';
+    el.hidden = !action;
+    toastFn = action && action.fn ? action.fn : null;
+    el.addEventListener('click', () => {
+      const fn = toastFn;
+      toastFn = null;
+      $('toast').hidden = true;
+      if (fn) fn();
+    });
+    old.replaceWith(el);
+    $('toast').hidden = false;
+    toastTimer = setTimeout(() => { $('toast').hidden = true; toastFn = null; }, action ? 5000 : 2000);
+  }
+
+  function removeLine(id) {
+    const idx = state.lines.findIndex((l) => l.id === id);
+    if (idx < 0) return;
+    const [gone] = state.lines.splice(idx, 1);
+    commit();
+    toast('Removed ' + fmt(gone.price * gone.qty), { label: 'Undo', fn: () => { state.lines.splice(idx, 0, gone); commit(); } });
+  }
+
+  /* ---------- History ---------- */
+  const DAY_FMT = { weekday: 'short', day: 'numeric', month: 'short' };
+  const TIME_FMT = { hour: 'numeric', minute: '2-digit' };
+  function finishTrip() {
+    if (!state.lines.length) { toast('Nothing to save yet'); return; }
+    const trip = {
+      id: Date.now(),
+      at: new Date().toISOString(),
+      total: totalOf(),
+      pieces: state.lines.reduce((a, l) => a + l.qty, 0),
+      budget: num(state.budget),
+      lines: state.lines.map((l) => ({ price: l.price, qty: l.qty, note: l.note || '' }))
+    };
+    const before = state.lines.slice();
+    history.unshift(trip);
+    if (history.length > 300) history.length = 300;
+    saveHistory();
+    state.lines = [];
+    commit();
+    closeMenu();
+    toast('Saved ' + fmt(trip.total) + ' to history', {
+      label: 'Undo',
+      fn: () => {
+        history = history.filter((t) => t.id !== trip.id);
+        saveHistory();
+        state.lines = before;
+        commit();
+      }
+    });
+  }
+
+  let openTrip = null;
+  let delArmed = null;
+  function renderHistory() {
+    const now = new Date();
+    const inMonth = history.filter((t) => {
+      const d = new Date(t.at);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    });
+    $('monthLbl').textContent = now.toLocaleDateString('en-GB', { month: 'long' }) + ': ' + inMonth.length + (inMonth.length === 1 ? ' trip' : ' trips');
+    $('monthAmt').textContent = fmt(inMonth.reduce((a, t) => a + t.total, 0));
+    $('histEmpty').hidden = history.length > 0;
+    $('month').hidden = history.length === 0;
+    const ul = $('trips');
+    ul.textContent = '';
+    history.forEach((t) => {
+      const li = document.createElement('li');
+      li.className = 'trip';
+      const head = document.createElement('button');
+      head.type = 'button';
+      head.className = 'trip-head';
+      head.setAttribute('aria-expanded', String(openTrip === t.id));
+      const left = document.createElement('span');
+      const d = new Date(t.at);
+      const dt = document.createElement('div');
+      dt.className = 'trip-date';
+      dt.textContent = d.toLocaleDateString('en-GB', DAY_FMT) + ', ' + d.toLocaleTimeString('en-US', TIME_FMT);
+      const sub = document.createElement('div');
+      sub.className = 'trip-sub';
+      let subTxt = t.pieces + (t.pieces === 1 ? ' item' : ' items');
+      if (t.budget > 0) subTxt += t.total > t.budget ? ', ' + fmt(t.total - t.budget) + ' over budget' : ', ' + fmt(t.budget - t.total) + ' under budget';
+      sub.textContent = subTxt;
+      left.append(dt, sub);
+      const amt = document.createElement('span');
+      amt.className = 'trip-amt num';
+      amt.textContent = fmt(t.total);
+      head.append(left, amt);
+      head.addEventListener('click', () => { openTrip = openTrip === t.id ? null : t.id; renderHistory(); });
+      li.appendChild(head);
+      if (openTrip === t.id) {
+        const body = document.createElement('div');
+        body.className = 'trip-body';
+        t.lines.forEach((l, i) => {
+          const row = document.createElement('div');
+          row.className = 'trip-row';
+          const a = document.createElement('span');
+          a.textContent = (i + 1) + '. ' + (l.note ? l.note + '  ' : '') + (l.qty > 1 ? fmt(l.price) + ' × ' + l.qty : '');
+          const b = document.createElement('span');
+          b.className = 'num';
+          b.textContent = fmt(l.price * l.qty);
+          row.append(a, b);
+          body.appendChild(row);
+        });
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'trip-del' + (delArmed === t.id ? ' armed' : '');
+        del.textContent = delArmed === t.id ? 'Tap again to delete this trip' : 'Delete this trip';
+        del.addEventListener('click', () => {
+          if (delArmed !== t.id) {
+            delArmed = t.id;
+            renderHistory();
+            setTimeout(() => { if (delArmed === t.id) { delArmed = null; renderHistory(); } }, 3000);
+            return;
+          }
+          delArmed = null;
+          history = history.filter((x) => x.id !== t.id);
+          saveHistory();
+          openTrip = null;
+          renderHistory();
+          render();
+        });
+        body.appendChild(del);
+        li.appendChild(body);
+      }
+      ul.appendChild(li);
+    });
+  }
+  function openHistory() { closeMenu(); openTrip = null; delArmed = null; renderHistory(); $('histWrap').hidden = false; }
+  function closeHistory() { $('histWrap').hidden = true; }
+
+  /* ---------- Menu ---------- */
+  function openMenu() {
+    const has = state.lines.length > 0;
+    $('mFinish').hidden = !has;
+    applyTheme(palette);
+    $('menuWrap').hidden = false;
+  }
+  function closeMenu() { $('menuWrap').hidden = true; }
+
+  /* ---------- Render ---------- */
+  const ICON_MINUS = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>';
+  const ICON_PLUS = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+  const ICON_BIN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+
+  const RANK = { none: 0, ok: 0, near: 1, over: 2 };
+  let lastLevel = budgetLevel(totalOf());
+  let pendingAlert = '';
+  function commit() {
+    save();
+    render();
+    const lvl = budgetLevel(totalOf());
+    if (RANK[lvl] > RANK[lastLevel]) {
+      const bud = num(state.budget);
+      const t = totalOf();
+      pendingAlert = lvl === 'over' ? 'Over budget by ' + fmt(t - bud) + '!' : 'Warning: ' + Math.round((t / bud) * 100) + '% of budget used';
+      const al = $('alert');
+      al.classList.remove('pulse');
+      void al.offsetWidth;
+      al.classList.add('pulse');
+      // If nothing else shows a message right after this change, show the warning on its own.
+      setTimeout(() => { if (pendingAlert) toast(''); }, 0);
+    }
+    lastLevel = lvl;
+  }
+
+  function render() {
+    const total = totalOf();
+    const n = state.lines.length;
+    const pieces = state.lines.reduce((a, l) => a + l.qty, 0);
+    $('total').textContent = fmt(total);
+    $('count').textContent = n === 0 ? 'Scan a price tag to start' : pieces + (pieces === 1 ? ' item' : ' items');
+    $('share').hidden = n === 0;
+    $('reset').hidden = n === 0;
+    $('emptyHist').hidden = history.length === 0;
+    const bud = num(state.budget);
+    const bb = $('budgetBtn');
+    const lvl = budgetLevel(total);
+    const al = $('alert');
+    $('total').classList.toggle('over', lvl === 'over');
+    if (bud > 0) {
+      const pct = Math.round((total / bud) * 100);
+      bb.className = 'budget-btn' + (lvl === 'over' ? ' over' : '');
+      bb.textContent = lvl === 'over' ? 'Budget ' + fmt(bud) + ' (tap to change)' : fmt(bud - total) + ' left of ' + fmt(bud);
+      $('bar').hidden = false;
+      $('bar').classList.toggle('over', lvl === 'over');
+      $('bar').classList.toggle('near', lvl === 'near');
+      $('bar').firstElementChild.style.width = Math.min(100, (total / bud) * 100) + '%';
+      if (lvl === 'over') {
+        al.className = 'alert over' + (al.classList.contains('pulse') ? ' pulse' : '');
+        $('alertTxt').textContent = 'Budget exceeded by ' + fmt(total - bud);
+        al.hidden = false;
+      } else if (lvl === 'near') {
+        al.className = 'alert near' + (al.classList.contains('pulse') ? ' pulse' : '');
+        $('alertTxt').textContent = 'Close to budget: ' + pct + '% used, ' + fmt(bud - total) + ' left';
+        al.hidden = false;
+      } else {
+        al.hidden = true;
+      }
+    } else {
+      bb.className = 'budget-btn none';
+      bb.textContent = 'Set a budget';
+      $('bar').hidden = true;
+      al.hidden = true;
+    }
+    $('empty').hidden = n !== 0;
+    $('tape').hidden = n === 0;
+    const tape = $('tape');
+    tape.textContent = '';
+    state.lines.forEach((l, i) => {
+      const li = document.createElement('li');
+      li.className = 'line';
+      const main = document.createElement('button');
+      main.type = 'button';
+      main.className = 'line-main';
+      main.setAttribute('aria-label', 'Edit line ' + (i + 1) + (l.note ? ', ' + l.note : ''));
+      const nEl = document.createElement('span');
+      nEl.className = 'line-n num';
+      nEl.textContent = String(i + 1);
+      main.appendChild(nEl);
+      if (l.thumb) {
+        const th = document.createElement('img');
+        th.className = 'thumb';
+        th.alt = '';
+        th.src = l.thumb;
+        main.appendChild(th);
+      }
+      const mid = document.createElement('span');
+      mid.className = 'line-mid';
+      if (l.note) {
+        const nt = document.createElement('span');
+        nt.className = 'line-note';
+        nt.textContent = l.note;
+        mid.appendChild(nt);
+      }
+      if (l.qty > 1) {
+        const calc = document.createElement('span');
+        calc.className = 'line-calc num';
+        calc.textContent = fmt(l.price) + ' × ' + l.qty;
+        mid.appendChild(calc);
+      }
+      const amt = document.createElement('span');
+      amt.className = 'line-amt num';
+      amt.textContent = fmt(l.price * l.qty);
+      main.append(mid, amt);
+      main.addEventListener('click', () => openSheet('edit', l.id));
+
+      const step = document.createElement('div');
+      step.className = 'stepper';
+      const dec = document.createElement('button');
+      dec.type = 'button';
+      dec.innerHTML = l.qty > 1 ? ICON_MINUS : ICON_BIN;
+      dec.setAttribute('aria-label', l.qty > 1 ? 'One less' : 'Remove line');
+      dec.addEventListener('click', () => { if (l.qty > 1) { l.qty -= 1; commit(); } else removeLine(l.id); });
+      const q = document.createElement('span');
+      q.className = 'q num';
+      q.textContent = String(l.qty);
+      const inc = document.createElement('button');
+      inc.type = 'button';
+      inc.innerHTML = ICON_PLUS;
+      inc.setAttribute('aria-label', 'One more');
+      inc.addEventListener('click', () => { l.qty += 1; commit(); });
+      step.append(dec, q, inc);
+      li.append(main, step);
+      tape.appendChild(li);
+    });
+    if (n > 0) {
+      const fl = document.createElement('li');
+      fl.className = 'finish-li';
+      const fb = document.createElement('button');
+      fb.type = 'button';
+      fb.className = 'finish';
+      fb.textContent = 'Finish shopping and save to history';
+      fb.addEventListener('click', finishTrip);
+      fl.appendChild(fb);
+      tape.appendChild(fl);
+    }
+  }
+
+  /* ---------- Wiring ---------- */
+  $('cam').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (f) scanFile(f);
+  });
+  $('manual').addEventListener('click', () => openSheet('manual'));
+  $('cancel').addEventListener('click', closeSheet);
+  $('scrim').addEventListener('click', closeSheet);
+  $('sheet').addEventListener('submit', submit);
+  $('qDec').addEventListener('click', () => { sheet.qty = Math.max(1, sheet.qty - 1); update(); });
+  $('qInc').addEventListener('click', () => { sheet.qty += 1; update(); });
+  $('fAmt').addEventListener('input', () => { sheet.typed = true; $('fAmt').removeAttribute('aria-invalid'); update(); });
+  $('remove').addEventListener('click', () => { const id = sheet.id; closeSheet(); removeLine(id); });
+
+  $('budgetBtn').addEventListener('click', () => {
+    $('fBud').value = num(state.budget) > 0 ? String(state.budget) : '';
+    $('budWrap').hidden = false;
+    setTimeout(() => $('fBud').focus(), 50);
+  });
+  const closeBud = () => { $('budWrap').hidden = true; };
+  $('budScrim').addEventListener('click', closeBud);
+  $('budOff').addEventListener('click', () => { state.budget = 0; closeBud(); commit(); });
+  $('budForm').addEventListener('submit', (e) => { e.preventDefault(); state.budget = num($('fBud').value); closeBud(); commit(); });
+
+  $('openMenu').addEventListener('click', openMenu);
+  $('menuClose').addEventListener('click', closeMenu);
+  $('menuScrim').addEventListener('click', closeMenu);
+  $('mFinish').addEventListener('click', finishTrip);
+  $('mHist').addEventListener('click', openHistory);
+  $('openHist').addEventListener('click', openHistory);
+  $('emptyHist').addEventListener('click', openHistory);
+  $('histClose').addEventListener('click', closeHistory);
+  $('histScrim').addEventListener('click', closeHistory);
+  document.querySelectorAll('.theme-opt').forEach((b) => b.addEventListener('click', () => applyTheme(b.dataset.pal)));
+  let resetArmed = null;
+  function disarmReset() {
+    clearTimeout(resetArmed);
+    resetArmed = null;
+    $('reset').classList.remove('armed');
+    $('resetTxt').textContent = 'Reset';
+  }
+  $('reset').addEventListener('click', () => {
+    if (!resetArmed) {
+      $('reset').classList.add('armed');
+      $('resetTxt').textContent = 'Tap to confirm';
+      resetArmed = setTimeout(disarmReset, 3000);
+      return;
+    }
+    disarmReset();
+    const before = state.lines.slice();
+    state.lines = [];
+    commit();
+    toast('List reset', { label: 'Undo', fn: () => { state.lines = before; commit(); } });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!$('sheetWrap').hidden) closeSheet();
+    else if (!$('budWrap').hidden) closeBud();
+    else if (!$('histWrap').hidden) closeHistory();
+    else if (!$('menuWrap').hidden) closeMenu();
+  });
+
+  function listText() {
+    const total = totalOf();
+    const pieces = state.lines.reduce((a, l) => a + l.qty, 0);
+    const rows = state.lines.map((l, i) => (i + 1) + '. ' + (l.note ? l.note + ': ' : '') + (l.qty > 1 ? fmt(l.price) + ' x ' + l.qty + ' = ' + fmt(l.price * l.qty) : fmt(l.price)));
+    const bud = num(state.budget);
+    const tail = bud > 0 ? (total > bud ? '\n' + fmt(total - bud) + ' over budget of ' + fmt(bud) : '\n' + fmt(bud - total) + ' left of ' + fmt(bud)) : '';
+    return 'Shopping total: ' + fmt(total) + ' (' + pieces + (pieces === 1 ? ' item' : ' items') + ')\n' + rows.join('\n') + tail;
+  }
+  $('share').addEventListener('click', async () => {
+    const text = listText();
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('List copied. Paste it in WhatsApp or Messages.');
+    } catch (e) {
+      toast('Could not copy here. Take a screenshot instead.');
+    }
+  });
+
+  /* ---------- Live camera with auto-read ---------- */
+  const live = { on: false, stream: null, timer: null, paused: false, last: null, streak: 0, suppress: null, suppressUntil: 0, card: null };
+
+  function liveHint(t) { $('liveHint').textContent = t; }
+  function liveRead(t, idle) { const el = $('liveRead'); el.textContent = t; el.classList.toggle('idle', !!idle); }
+
+  async function openLive() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('cam').click(); return; }
+    $('liveTotalAmt').textContent = fmt(totalOf());
+    $('confirm').hidden = true;
+    $('liveFrame').classList.remove('locked');
+    liveRead('Starting camera…', true);
+    liveHint('Fit the price inside the frame and hold steady');
+    $('live').hidden = false;
+    try {
+      if (!live.stream) {
+        live.stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+      }
+      const v = $('liveVideo');
+      v.srcObject = live.stream;
+      await v.play().catch(() => {});
+    } catch (e) {
+      closeLive();
+      toast('Live camera not allowed here. Opening the Camera app instead.');
+      $('cam').click();
+      return;
+    }
+    live.on = true;
+    live.paused = false;
+    live.last = null;
+    live.streak = 0;
+    loopLive();
+  }
+
+  function closeLive() {
+    live.on = false;
+    clearTimeout(live.timer);
+    if (live.stream) { live.stream.getTracks().forEach((t) => t.stop()); live.stream = null; }
+    $('liveVideo').srcObject = null;
+    $('confirm').hidden = true;
+    $('live').classList.remove('asking');
+    $('live').hidden = true;
+  }
+
+  // Copy what is inside the yellow frame (or the whole view) out of the video.
+  function grabFrame(whole) {
+    const v = $('liveVideo');
+    const vw = v.videoWidth, vh = v.videoHeight;
+    if (!vw || !vh) return null;
+    const vr = v.getBoundingClientRect();
+    const scale = Math.max(vr.width / vw, vr.height / vh);
+    const ox = vr.left + (vr.width - vw * scale) / 2;
+    const oy = vr.top + (vr.height - vh * scale) / 2;
+    let sx = 0, sy = 0, sw = vw, sh = vh;
+    if (!whole) {
+      const fr = $('liveFrame').getBoundingClientRect();
+      sx = Math.max(0, (fr.left - ox) / scale);
+      sy = Math.max(0, (fr.top - oy) / scale);
+      sw = Math.min(vw - sx, fr.width / scale);
+      sh = Math.min(vh - sy, fr.height / scale);
+    } else {
+      // The part of the video you can see on screen.
+      sx = Math.max(0, (vr.left - ox) / scale);
+      sy = Math.max(0, (vr.top - oy) / scale);
+      sw = Math.min(vw - sx, vr.width / scale);
+      sh = Math.min(vh - sy, vr.height / scale);
+    }
+    const maxSide = whole ? 1000 : 800;
+    const k = Math.min(2, maxSide / Math.max(sw, sh));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(sw * k));
+    c.height = Math.max(1, Math.round(sh * k));
+    c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  function thumbOf(c) {
+    try {
+      const t = document.createElement('canvas');
+      const side = 96, sq = Math.min(c.width, c.height);
+      t.width = side; t.height = side;
+      t.getContext('2d').drawImage(c, (c.width - sq) / 2, (c.height - sq) / 2, sq, sq, 0, 0, side, side);
+      return t.toDataURL('image/jpeg', 0.5);
+    } catch (e) { return ''; }
+  }
+
+  async function loopLive() {
+    if (!live.on || live.paused) return;
+    if (!worker) {
+      liveRead('Getting the reader ready…', true);
+      try { await getReader(); } catch (e) { liveRead('Reader could not start', true); liveHint('Tap the white button to take a photo instead'); return; }
+      if (!live.on || live.paused) return;
+    }
+    const c = grabFrame(false);
+    if (!c) { live.timer = setTimeout(loopLive, 250); return; }
+    const t0 = performance.now();
+    let list = [];
+    try { list = await readColorCanvas(worker, c); } catch (e) { list = []; }
+    if (!live.on || live.paused) return;
+    handleLive(list, c);
+    if (!live.on || live.paused) return;
+    live.timer = setTimeout(loopLive, Math.max(120, 450 - (performance.now() - t0)));
+  }
+
+  function handleLive(list, c) {
+    const top = list[0];
+    if (!top) {
+      live.last = null;
+      live.streak = 0;
+      live.suppress = null;
+      liveRead('Looking for a price…', true);
+      liveHint('Fit the price inside the frame and hold steady');
+      return;
+    }
+    const v = top.value;
+    liveRead(fmt(v), false);
+    if (live.suppress !== null) {
+      if (v === live.suppress && Date.now() < live.suppressUntil) {
+        liveHint('Already done. Move to the next tag');
+        live.last = v;
+        return;
+      }
+      live.suppress = null;
+    }
+    live.streak = live.last === v ? live.streak + 1 : 1;
+    live.last = v;
+    if (live.streak >= 2) {
+      showConfirm(list, c);
+    } else {
+      liveHint('Hold steady…');
+    }
+  }
+
+  function showConfirm(list, c) {
+    live.paused = true;
+    clearTimeout(live.timer);
+    $('liveFrame').classList.add('locked');
+    if (navigator.vibrate) { try { navigator.vibrate(40); } catch (e) {} }
+    live.card = { value: list[0].value, qty: 1, list, canvas: c, thumb: thumbOf(c) };
+    $('confirmImg').src = c.toDataURL('image/jpeg', 0.6);
+    const alts = list.slice(1, 5).map((x) => x.value);
+    const box = $('confirmAlts');
+    box.textContent = '';
+    alts.forEach((val) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.v = String(val);
+      b.textContent = fmt(val);
+      b.addEventListener('click', () => { live.card.value = val; renderConfirm(); });
+      box.appendChild(b);
+    });
+    $('confirmAltWrap').hidden = alts.length === 0;
+    renderConfirm();
+    $('confirm').hidden = false;
+    $('live').classList.add('asking');
+  }
+  function renderConfirm() {
+    const k = live.card;
+    $('confirmAmt').textContent = fmt(k.value);
+    $('cQty').textContent = String(k.qty);
+    const bud = num(state.budget);
+    const after = totalOf() + k.value * k.qty;
+    const lvl = budgetLevel(after);
+    $('confirmQ').textContent = lvl === 'over' ? 'Add this? You will be ' + fmt(after - bud) + ' over budget' : lvl === 'near' ? 'Add this? Only ' + fmt(bud - after) + ' left after' : 'Add this price?';
+    Array.from($('confirmAlts').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === k.value)));
+  }
+  function resumeLive(suppressMs) {
+    const k = live.card;
+    live.card = null;
+    $('confirm').hidden = true;
+    $('live').classList.remove('asking');
+    $('liveFrame').classList.remove('locked');
+    if (k) { live.suppress = k.list[0].value; live.suppressUntil = Date.now() + suppressMs; }
+    live.last = null;
+    live.streak = 0;
+    live.paused = false;
+    $('liveTotalAmt').textContent = fmt(totalOf());
+    liveHint('Fit the price inside the frame and hold steady');
+    loopLive();
+  }
+
+  $('scanBtn').addEventListener('click', openLive);
+  $('liveClose').addEventListener('click', closeLive);
+  $('liveTotal').addEventListener('click', closeLive);
+  $('liveType').addEventListener('click', () => { closeLive(); openSheet('manual'); });
+  $('liveShutter').addEventListener('click', () => {
+    const c = grabFrame(true);
+    closeLive();
+    if (!c) { $('cam').click(); return; }
+    scanPrepared({ color: c, preview: c.toDataURL('image/jpeg', 0.75), thumb: thumbOf(c) });
+  });
+  $('cDec').addEventListener('click', () => { if (live.card) { live.card.qty = Math.max(1, live.card.qty - 1); renderConfirm(); } });
+  $('cInc').addEventListener('click', () => { if (live.card) { live.card.qty += 1; renderConfirm(); } });
+  $('cYes').addEventListener('click', () => {
+    const k = live.card;
+    if (!k) return;
+    state.lines.push({ id: state.nextId++, price: k.value, qty: k.qty, note: '', thumb: k.thumb || '' });
+    commit();
+    toast('Added ' + fmt(k.value * k.qty));
+    resumeLive(6000);
+  });
+  $('cNo').addEventListener('click', () => resumeLive(4000));
+  $('cEdit').addEventListener('click', () => {
+    const k = live.card;
+    closeLive();
+    if (!k) return;
+    scanPrepared({ color: k.canvas, preview: k.canvas.toDataURL('image/jpeg', 0.75), thumb: k.thumb });
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && live.on) closeLive(); });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
