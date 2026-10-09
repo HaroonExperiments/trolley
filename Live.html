@@ -273,6 +273,23 @@ button{cursor:pointer}
 @keyframes pulse2{50%{transform:scale(1.08);box-shadow:0 0 0 12px rgba(29,117,80,.12)}}
 .listen-text{font-size:22px;font-weight:700;min-height:30px}
 .listen-hint{color:var(--muted);font-size:14px;margin:0}
+.sug{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.sug button{border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left;padding:10px 12px;min-height:48px;display:flex;flex-direction:column;gap:2px}
+.sug button:last-child{border-bottom:0}
+.sug b{font-size:15px}
+.sug small{font-size:12.5px;color:var(--muted);font-weight:600}
+.cmp{border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700;line-height:1.35}
+.cmp.up{background:var(--warn-soft);color:var(--warn)}
+.cmp.down{background:var(--accent-soft);color:var(--accent)}
+.cmp.same{background:var(--chip);color:var(--muted)}
+.finish-row{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
+.bill-sum{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;color:var(--muted)}
+.bill-sum b{color:var(--ink);font-size:22px}
+.bill-res{border-radius:14px;padding:14px;font-size:16px;font-weight:700;line-height:1.4}
+.bill-res.ok{background:var(--accent-soft);color:var(--accent)}
+.bill-res.bad{background:#B42318;color:#FFFFFF}
+.bill-res.less{background:var(--near-soft);color:var(--near)}
+.bill-res small{display:block;font-weight:600;font-size:13.5px;margin-top:4px;opacity:.95}
 .toast{position:fixed;left:16px;right:16px;bottom:calc(110px + env(safe-area-inset-bottom,0px));margin:0 auto;max-width:528px;background:#13261F;color:#FFFFFF;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:8px 8px 8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600;font-size:15px;z-index:25;box-shadow:0 12px 30px rgba(0,0,0,.25)}
 .toast span{padding:8px 0}
 .toast button,.toast label{border:0;background:transparent;color:#FFE15A;font-weight:800;min-height:40px;padding:0 10px;display:flex;align-items:center;cursor:pointer}
@@ -372,8 +389,10 @@ button{cursor:pointer}
     </div>
     <div class="note-field">
       <label for="cNote">Note (optional)</label>
-      <input id="cNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. milk, pastry" enterkeyhint="done">
+      <input id="cNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Nestle milk 1 L" enterkeyhint="done">
     </div>
+    <div id="cSug" class="sug" hidden></div>
+    <div id="cCmp" class="cmp" hidden></div>
     <div id="cRecent" class="confirm-recent" hidden></div>
     <div class="confirm-row">
       <span class="lbl" id="cQtyLbl" style="font-weight:700">Quantity</span>
@@ -419,8 +438,10 @@ button{cursor:pointer}
     </div>
     <div class="note-field">
       <label for="fNote">Note (optional)</label>
-      <input id="fNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. milk, rice">
+      <input id="fNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Nestle milk 1 L">
     </div>
+    <div id="noteSug" class="sug" hidden></div>
+    <div id="priceCmp" class="cmp" hidden></div>
     <div class="row2">
       <span class="lbl" id="qtyLbl">Quantity</span>
       <div class="qty" role="group" aria-labelledby="qtyLbl">
@@ -490,6 +511,24 @@ button{cursor:pointer}
   </div>
 </div>
 
+<!-- Bill check -->
+<div id="billWrap" class="sheet-wrap" hidden>
+  <button id="billScrim" class="scrim" type="button" aria-label="Close"></button>
+  <form id="billForm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="billTitle" novalidate>
+    <div class="sheet-head"><h2 id="billTitle">Check the bill</h2></div>
+    <div class="bill-sum"><span>Your scans add up to</span><b id="billMine" class="num">0</b></div>
+    <div class="amount-field">
+      <label for="fBill">Total on the receipt</label>
+      <input id="fBill" type="text" inputmode="decimal" autocomplete="off" placeholder="Type the receipt total">
+    </div>
+    <div id="billRes" class="bill-res" role="status" hidden></div>
+    <div class="actions">
+      <button id="billClose" class="btn secondary" type="button">Close</button>
+      <button id="billFinish" class="btn primary" type="submit">Finish and save</button>
+    </div>
+  </form>
+</div>
+
 <!-- More menu -->
 <div id="menuWrap" class="sheet-wrap" hidden>
   <button id="menuScrim" class="scrim" type="button" aria-label="Close"></button>
@@ -502,6 +541,10 @@ button{cursor:pointer}
       <button id="mFinish" class="menu-item" type="button">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
         <span>Finish shopping<small>Save this trip to history and start a new one</small></span>
+      </button>
+      <button id="mBill" class="menu-item" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+        <span>Check the bill<small>Compare the receipt total with your scans</small></span>
       </button>
       <button id="mHist" class="menu-item" type="button">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
@@ -1179,6 +1222,7 @@ async function readImage(img) {
     const line = mode === 'edit' ? state.lines.find((l) => l.id === id) : null;
     $('fAmt').value = line ? String(line.price) : '';
     $('fNote').value = line && line.note ? line.note : '';
+    $('noteSug').hidden = true;
     $('fAmt').removeAttribute('aria-invalid');
     sheet.qty = line ? line.qty : 1;
     $('sheetTitle').textContent = mode === 'edit' ? 'Edit line' : 'Add price';
@@ -1220,6 +1264,7 @@ async function readImage(img) {
     const cur = num($('fAmt').value);
     Array.from($('chips').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === cur)));
     $('overlay').querySelectorAll('.nb').forEach((b) => b.classList.toggle('sel', num(b.dataset.v) === cur));
+    renderCompare($('priceCmp'), $('fNote').value, cur);
   }
 
   function pickValue(v) {
@@ -1501,6 +1546,7 @@ async function readImage(img) {
       gstMode: settings.gstMode,
       gstRate: gstRate(),
       shop: state.shop || '',
+      bill: num(state.bill) || 0,
       pieces: state.lines.reduce((a, l) => a + l.qty, 0),
       budget: num(state.budget),
       lines: state.lines.map((l) => ({ price: l.price, qty: l.qty, note: l.note || '' }))
@@ -1510,10 +1556,13 @@ async function readImage(img) {
     history.unshift(trip);
     if (history.length > 300) history.length = 300;
     saveHistory();
+    const beforeBill = state.bill || '';
     state.lines = [];
     state.shop = '';
+    state.bill = '';
     commit();
     closeMenu();
+    $('billWrap').hidden = true;
     toast('Saved ' + fmt(trip.total) + (trip.shop ? ' at ' + trip.shop : '') + ' to history', {
       label: 'Undo',
       fn: () => {
@@ -1521,6 +1570,7 @@ async function readImage(img) {
         saveHistory();
         state.lines = before;
         state.shop = beforeShop;
+        state.bill = beforeBill;
         commit();
       }
     });
@@ -1556,6 +1606,7 @@ async function readImage(img) {
       sub.className = 'trip-sub';
       let subTxt = (t.shop ? t.shop + ', ' : '') + t.pieces + (t.pieces === 1 ? ' item' : ' items');
       if (t.gstMode === 'excl') subTxt += ', incl. ' + fmt(t.total - t.subtotal) + ' GST';
+      if (t.bill > 0) subTxt += Math.abs(t.bill - t.total) < 1 ? ', bill matched' : ', bill ' + (t.bill > t.total ? fmt(t.bill - t.total) + ' more' : fmt(t.total - t.bill) + ' less');
       if (t.budget > 0) subTxt += t.total > t.budget ? ', ' + fmt(t.total - t.budget) + ' over budget' : ', ' + fmt(t.budget - t.total) + ' under budget';
       sub.textContent = subTxt;
       left.append(dt, sub);
@@ -1610,6 +1661,7 @@ async function readImage(img) {
   function openMenu() {
     const has = state.lines.length > 0;
     $('mFinish').hidden = !has;
+    $('mBill').hidden = !has;
     applyTheme(palette);
     $('menuWrap').hidden = false;
   }
@@ -1754,12 +1806,20 @@ async function readImage(img) {
     if (n > 0) {
       const fl = document.createElement('li');
       fl.className = 'finish-li';
+      const row = document.createElement('div');
+      row.className = 'finish-row';
+      const bb2 = document.createElement('button');
+      bb2.type = 'button';
+      bb2.className = 'finish';
+      bb2.textContent = num(state.bill) > 0 ? 'Bill: ' + fmt(num(state.bill)) : 'Check bill';
+      bb2.addEventListener('click', openBill);
       const fb = document.createElement('button');
       fb.type = 'button';
       fb.className = 'finish';
-      fb.textContent = 'Finish shopping and save to history';
+      fb.textContent = 'Finish and save';
       fb.addEventListener('click', finishTrip);
-      fl.appendChild(fb);
+      row.append(bb2, fb);
+      fl.appendChild(row);
       tape.appendChild(fl);
     }
   }
@@ -2018,6 +2078,149 @@ async function readImage(img) {
     }
   });
 
+  /* ---------- Items you bought before: suggestions and price comparison ---------- */
+  const SHORT_DATE = { day: 'numeric', month: 'short' };
+  function catalog() {
+    const map = new Map();
+    history.forEach((t) => (t.lines || []).forEach((l) => {
+      const name = String(l.note || '').trim();
+      if (!name || !(l.price > 0)) return;
+      const k = name.toLowerCase();
+      let e = map.get(k);
+      if (!e) { e = { name, buys: [] }; map.set(k, e); }
+      e.buys.push({ price: l.price, shop: t.shop || '', at: t.at || '' });
+    }));
+    map.forEach((e) => e.buys.sort((a, b) => String(b.at).localeCompare(String(a.at))));
+    return map;
+  }
+  const where = (b) => (b.shop ? ' at ' + b.shop : '') + (b.at ? ', ' + new Date(b.at).toLocaleDateString('en-GB', SHORT_DATE) : '');
+  function suggestions(q) {
+    q = String(q || '').trim().toLowerCase();
+    if (q.length < 2) return [];
+    const words = q.split(/\s+/);
+    const out = [];
+    catalog().forEach((e, k) => {
+      if (k === q) return; // already typed exactly
+      if (!words.every((w) => k.includes(w))) return;
+      const rank = k.startsWith(q) ? 0 : (' ' + k).includes(' ' + words[0]) ? 1 : 2;
+      out.push({ e, rank, at: e.buys[0].at });
+    });
+    out.sort((a, b) => a.rank - b.rank || String(b.at).localeCompare(String(a.at)));
+    return out.slice(0, 6).map((x) => x.e);
+  }
+  function showSug(input, box, onPick) {
+    const list = suggestions(input.value);
+    box.textContent = '';
+    list.forEach((e) => {
+      const last = e.buys[0];
+      const low = e.buys.reduce((m, b) => (b.price < m.price ? b : m), e.buys[0]);
+      const b = document.createElement('button');
+      b.type = 'button';
+      const nm = document.createElement('b');
+      nm.textContent = e.name;
+      const sm = document.createElement('small');
+      sm.textContent = 'Last ' + fmt(last.price) + where(last) + (low.price < last.price ? '. Lowest ' + fmt(low.price) + (low.shop ? ' at ' + low.shop : '') : '');
+      b.append(nm, sm);
+      // pointerdown keeps the keyboard from closing before the tap lands
+      b.addEventListener('pointerdown', (ev) => ev.preventDefault());
+      b.addEventListener('click', () => { input.value = e.name; box.hidden = true; onPick(e); });
+      box.appendChild(b);
+    });
+    box.hidden = list.length === 0;
+  }
+  function renderCompare(el, note, price) {
+    const e = catalog().get(String(note || '').trim().toLowerCase());
+    if (!e || !(price > 0)) { el.hidden = true; return; }
+    const low = e.buys.reduce((m, b) => (b.price < m.price ? b : m), e.buys[0]);
+    const here = state.shop ? e.buys.find((b) => b.shop && b.shop.toLowerCase() === state.shop.toLowerCase()) : null;
+    let msg, cls;
+    if (price > low.price) {
+      cls = 'up';
+      msg = fmt(price - low.price) + ' more than you paid' + where(low) + ' (' + fmt(low.price) + ')';
+    } else if (price < low.price) {
+      cls = 'down';
+      msg = 'Lowest price so far. Before: ' + fmt(e.buys[0].price) + where(e.buys[0]);
+    } else {
+      cls = 'same';
+      msg = 'Same as your best price' + where(low);
+    }
+    if (here && here !== low && here.price !== price) msg += '. Here last time: ' + fmt(here.price);
+    el.className = 'cmp ' + cls;
+    el.textContent = msg;
+    el.hidden = false;
+  }
+  $('fNote').addEventListener('input', () => {
+    showSug($('fNote'), $('noteSug'), (e) => {
+      // Typing a remembered item: offer its last price if the price box is still empty.
+      if (!(num($('fAmt').value) > 0)) {
+        const here = state.shop ? e.buys.find((b) => b.shop && b.shop.toLowerCase() === state.shop.toLowerCase()) : null;
+        $('fAmt').value = numStr((here || e.buys[0]).price);
+      }
+      update();
+    });
+    update();
+  });
+  $('fNote').addEventListener('blur', () => {
+    setTimeout(() => { $('noteSug').hidden = true; }, 150);
+    // Dictated "milk 290" into the note box: move the price where it belongs.
+    if (!(num($('fAmt').value) > 0) && /\d/.test($('fNote').value)) {
+      const r = parseSpoken($('fNote').value);
+      if (r.price > 0) {
+        $('fAmt').value = numStr(r.price);
+        $('fNote').value = r.note ? r.note.charAt(0).toUpperCase() + r.note.slice(1) : '';
+        sheet.qty = r.qty;
+        sheet.typed = true;
+        update();
+      }
+    }
+  });
+  $('cNote').addEventListener('input', () => {
+    showSug($('cNote'), $('cSug'), () => renderConfirm());
+    if (live.card) renderConfirm();
+  });
+  $('cNote').addEventListener('blur', () => { setTimeout(() => { $('cSug').hidden = true; }, 150); });
+
+  /* ---------- Bill check ---------- */
+  function renderBill() {
+    const mine = totalOf();
+    $('billMine').textContent = fmt(mine);
+    const bill = num($('fBill').value);
+    const res = $('billRes');
+    if (!(bill > 0)) { res.hidden = true; return; }
+    const diff = Math.round((bill - mine) * 100) / 100;
+    res.textContent = '';
+    const main = document.createElement('div');
+    const sm = document.createElement('small');
+    if (Math.abs(diff) < 1) {
+      res.className = 'bill-res ok';
+      main.textContent = 'The bill matches your scans.';
+      sm.textContent = 'Nothing to check.';
+    } else if (diff > 0) {
+      res.className = 'bill-res bad';
+      main.textContent = 'The receipt is ' + fmt(diff) + ' more than your scans.';
+      sm.textContent = 'Look for an item charged twice, a price higher than the shelf tag, or something you did not scan.';
+    } else {
+      res.className = 'bill-res less';
+      main.textContent = 'The receipt is ' + fmt(-diff) + ' less than your scans.';
+      sm.textContent = 'Maybe a discount at the till, or an item that was not billed.';
+    }
+    res.append(main, sm);
+    res.hidden = false;
+  }
+  function openBill() {
+    closeMenu();
+    $('fBill').value = num(state.bill) > 0 ? numStr(num(state.bill)) : '';
+    renderBill();
+    $('billWrap').hidden = false;
+    setTimeout(() => $('fBill').focus(), 50);
+  }
+  const closeBill = () => { $('billWrap').hidden = true; };
+  $('mBill').addEventListener('click', openBill);
+  $('billClose').addEventListener('click', () => { state.bill = $('fBill').value.replace(/[^0-9.]/g, ''); save(); render(); closeBill(); });
+  $('billScrim').addEventListener('click', () => { state.bill = $('fBill').value.replace(/[^0-9.]/g, ''); save(); render(); closeBill(); });
+  $('fBill').addEventListener('input', () => { state.bill = $('fBill').value.replace(/[^0-9.]/g, ''); save(); renderBill(); });
+  $('billForm').addEventListener('submit', (e) => { e.preventDefault(); state.bill = $('fBill').value.replace(/[^0-9.]/g, ''); finishTrip(); });
+
   function listText() {
     const total = totalOf();
     const pieces = state.lines.reduce((a, l) => a + l.qty, 0);
@@ -2198,6 +2401,7 @@ async function readImage(img) {
     });
     $('confirmAltWrap').hidden = alts.length === 0;
     $('cNote').value = '';
+    $('cSug').hidden = true;
     const recent = [];
     const seenNotes = new Set();
     const pushNote = (n) => { const t = String(n || '').trim(); const k = t.toLowerCase(); if (t && !seenNotes.has(k) && recent.length < 6) { seenNotes.add(k); recent.push(t); } };
@@ -2227,6 +2431,7 @@ async function readImage(img) {
     const lvl = budgetLevel(after);
     $('confirmQ').textContent = lvl === 'over' ? 'Add this? You will be ' + fmt(after - bud) + ' over budget' : lvl === 'near' ? 'Add this? Only ' + fmt(bud - after) + ' left after' : 'Add this price?';
     Array.from($('confirmAlts').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === k.value)));
+    renderCompare($('cCmp'), $('cNote').value, k.value);
   }
   function resumeLive(suppressMs) {
     const k = live.card;
