@@ -279,7 +279,16 @@ button{cursor:pointer}
 .sug b{font-size:15px}
 .sug small{font-size:12.5px;color:var(--muted);font-weight:600}
 .cmp{border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700;line-height:1.35}
-.cmp.up{background:var(--warn-soft);color:var(--warn)}
+.cmp.up{background:var(--warn);color:var(--surface);font-size:15.5px;font-weight:800;animation:pop .2s ease-out}
+.more-btn{align-self:flex-start;border:1px dashed var(--line);background:transparent;color:var(--accent);border-radius:999px;min-height:40px;padding:0 14px;font-weight:800;font-size:14px}
+.details{display:flex;flex-direction:column;gap:10px}
+.details-row{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cat-chips .chip{font-family:inherit;font-size:14px;min-height:38px;padding:0 12px}
+.line-cat{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-right:6px}
+.line-up{color:var(--warn);font-size:13px;font-weight:800;line-height:1.3}
+.trip-up{color:var(--warn);font-weight:800}
+.toast.warn{background:#9A3008;border-color:#FFB08A}
 .cmp.down{background:var(--accent-soft);color:var(--accent)}
 .cmp.same{background:var(--chip);color:var(--muted)}
 .finish-row{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
@@ -388,10 +397,18 @@ button{cursor:pointer}
       <div id="confirmAlts" class="chips"></div>
     </div>
     <div class="note-field">
-      <label for="cNote">Note (optional)</label>
-      <input id="cNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Nestle milk 1 L" enterkeyhint="done">
+      <label for="cNote">Item (optional)</label>
+      <input id="cNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Milk" enterkeyhint="done">
     </div>
     <div id="cSug" class="sug" hidden></div>
+    <button id="cMore" class="more-btn" type="button" aria-expanded="false">+ Category, brand, size</button>
+    <div id="cDetails" class="details" hidden>
+      <div id="cCats" class="cat-chips" role="group" aria-label="Category"></div>
+      <div class="details-row">
+        <div class="note-field"><label for="cBrand">Brand</label><input id="cBrand" type="text" autocomplete="off" maxlength="30" placeholder="e.g. Olpers"></div>
+        <div class="note-field"><label for="cSize">Size</label><input id="cSize" type="text" autocomplete="off" maxlength="15" placeholder="e.g. 1.5 L"></div>
+      </div>
+    </div>
     <div id="cCmp" class="cmp" hidden></div>
     <div id="cRecent" class="confirm-recent" hidden></div>
     <div class="confirm-row">
@@ -437,10 +454,18 @@ button{cursor:pointer}
       <div id="chips" class="chips"></div>
     </div>
     <div class="note-field">
-      <label for="fNote">Note (optional)</label>
-      <input id="fNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Nestle milk 1 L">
+      <label for="fNote">Item (optional)</label>
+      <input id="fNote" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Milk">
     </div>
     <div id="noteSug" class="sug" hidden></div>
+    <button id="fMore" class="more-btn" type="button" aria-expanded="false">+ Category, brand, size</button>
+    <div id="fDetails" class="details" hidden>
+      <div id="fCats" class="cat-chips" role="group" aria-label="Category"></div>
+      <div class="details-row">
+        <div class="note-field"><label for="fBrand">Brand</label><input id="fBrand" type="text" autocomplete="off" maxlength="30" placeholder="e.g. Olpers"></div>
+        <div class="note-field"><label for="fSize">Size</label><input id="fSize" type="text" autocomplete="off" maxlength="15" placeholder="e.g. 1.5 L"></div>
+      </div>
+    </div>
     <div id="priceCmp" class="cmp" hidden></div>
     <div class="row2">
       <span class="lbl" id="qtyLbl">Quantity</span>
@@ -1221,7 +1246,7 @@ async function readImage(img) {
     clearOverlay();
     const line = mode === 'edit' ? state.lines.find((l) => l.id === id) : null;
     $('fAmt').value = line ? String(line.price) : '';
-    $('fNote').value = line && line.note ? line.note : '';
+    sheetDetails.set(line ? partsOf(line) : null);
     $('noteSug').hidden = true;
     $('fAmt').removeAttribute('aria-invalid');
     sheet.qty = line ? line.qty : 1;
@@ -1264,7 +1289,7 @@ async function readImage(img) {
     const cur = num($('fAmt').value);
     Array.from($('chips').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === cur)));
     $('overlay').querySelectorAll('.nb').forEach((b) => b.classList.toggle('sel', num(b.dataset.v) === cur));
-    renderCompare($('priceCmp'), $('fNote').value, cur);
+    renderCompare($('priceCmp'), sheetDetails.get(), cur);
   }
 
   function pickValue(v) {
@@ -1483,28 +1508,33 @@ async function readImage(img) {
       $('fAmt').focus();
       return;
     }
-    const note = $('fNote').value.trim().slice(0, 40);
+    const parts = sheetDetails.get();
+    const note = nameOf(parts).slice(0, 60);
     if (sheet.mode === 'edit') {
       const l = state.lines.find((x) => x.id === sheet.id);
-      if (l) { l.price = price; l.qty = sheet.qty; l.note = note; }
+      if (l) { Object.assign(l, { price, qty: sheet.qty, note, item: parts.item, brand: parts.brand, size: parts.size, cat: parts.cat }); }
       closeSheet();
       commit();
       return;
     }
     const wasScan = sheet.mode === 'scan';
-    state.lines.push({ id: state.nextId++, price, qty: sheet.qty, note, thumb: sheet.thumb || '' });
+    state.lines.push({ id: state.nextId++, price, qty: sheet.qty, note, item: parts.item, brand: parts.brand, size: parts.size, cat: parts.cat, thumb: sheet.thumb || '' });
+    const pw = priceWarning(parts, price);
     closeSheet();
     commit();
-    toast('Added ' + fmt(price * sheet.qty), wasScan ? { label: 'Scan next', fn: openLive } : null);
+    toast(pw || 'Added ' + fmt(price * sheet.qty), wasScan ? { label: 'Scan next', fn: openLive } : null, pw ? { warn: true } : null);
+    if (pw) warnBeep();
     const tape = $('tape');
     tape.scrollTop = tape.scrollHeight;
   }
 
   /* ---------- Toast ---------- */
   let toastTimer = null, toastFn = null;
-  function toast(msg, action) {
+  function toast(msg, action, opts) {
     clearTimeout(toastTimer);
-    if (pendingAlert) { msg = pendingAlert; pendingAlert = ''; }
+    let warn = !!(opts && opts.warn);
+    if (pendingAlert) { msg = warn && msg ? msg + '. ' + pendingAlert : pendingAlert; pendingAlert = ''; warn = true; }
+    $('toast').classList.toggle('warn', warn);
     $('toastMsg').textContent = msg;
     const old = $('toastAct');
     // "Scan next" must be a label for the camera input so the phone opens the camera.
@@ -1522,7 +1552,7 @@ async function readImage(img) {
     });
     old.replaceWith(el);
     $('toast').hidden = false;
-    toastTimer = setTimeout(() => { $('toast').hidden = true; toastFn = null; }, action ? 5000 : 2000);
+    toastTimer = setTimeout(() => { $('toast').hidden = true; toastFn = null; }, warn ? 6000 : action ? 5000 : 2000);
   }
 
   function removeLine(id) {
@@ -1549,7 +1579,7 @@ async function readImage(img) {
       bill: num(state.bill) || 0,
       pieces: state.lines.reduce((a, l) => a + l.qty, 0),
       budget: num(state.budget),
-      lines: state.lines.map((l) => ({ price: l.price, qty: l.qty, note: l.note || '' }))
+      lines: state.lines.map((l) => ({ price: l.price, qty: l.qty, note: l.note || '', item: l.item || '', brand: l.brand || '', size: l.size || '', cat: l.cat || '' }))
     };
     const before = state.lines.slice();
     const beforeShop = state.shop || '';
@@ -1608,6 +1638,8 @@ async function readImage(img) {
       if (t.gstMode === 'excl') subTxt += ', incl. ' + fmt(t.total - t.subtotal) + ' GST';
       if (t.bill > 0) subTxt += Math.abs(t.bill - t.total) < 1 ? ', bill matched' : ', bill ' + (t.bill > t.total ? fmt(t.bill - t.total) + ' more' : fmt(t.total - t.bill) + ' less');
       if (t.budget > 0) subTxt += t.total > t.budget ? ', ' + fmt(t.total - t.budget) + ' over budget' : ', ' + fmt(t.budget - t.total) + ' under budget';
+      const nUp = (pricierByTrip().get(t.id) || []).filter(Boolean).length;
+      if (nUp) subTxt += ', ▲ ' + nUp + ' pricier than before';
       sub.textContent = subTxt;
       left.append(dt, sub);
       const amt = document.createElement('span');
@@ -1619,11 +1651,18 @@ async function readImage(img) {
       if (openTrip === t.id) {
         const body = document.createElement('div');
         body.className = 'trip-body';
+        const marks = pricierByTrip().get(t.id) || [];
         t.lines.forEach((l, i) => {
           const row = document.createElement('div');
           row.className = 'trip-row';
           const a = document.createElement('span');
-          a.textContent = (i + 1) + '. ' + (l.note ? l.note + '  ' : '') + (l.qty > 1 ? fmt(l.price) + ' × ' + l.qty : '');
+          a.textContent = (i + 1) + '. ' + (l.cat ? l.cat + ': ' : '') + (l.note ? l.note + '  ' : '') + (l.qty > 1 ? fmt(l.price) + ' × ' + l.qty : '');
+          if (marks[i]) {
+            const up = document.createElement('span');
+            up.className = 'trip-up';
+            up.textContent = '  ▲ ' + fmt(marks[i].diff) + ' more than' + (marks[i].shop ? ' ' + marks[i].shop : ' before');
+            a.appendChild(up);
+          }
           const b = document.createElement('span');
           b.className = 'num';
           b.textContent = fmt(l.price * l.qty);
@@ -1766,11 +1805,19 @@ async function readImage(img) {
       }
       const mid = document.createElement('span');
       mid.className = 'line-mid';
-      if (l.note) {
+      if (l.note || l.cat) {
         const nt = document.createElement('span');
         nt.className = 'line-note';
-        nt.textContent = l.note;
+        if (l.cat) { const ct = document.createElement('span'); ct.className = 'line-cat'; ct.textContent = l.cat; nt.appendChild(ct); }
+        nt.appendChild(document.createTextNode(l.note || ''));
         mid.appendChild(nt);
+      }
+      const lup = compareInfo(partsOf(l), l.price);
+      if (lup && lup.diff > 0) {
+        const ut = document.createElement('span');
+        ut.className = 'line-up';
+        ut.textContent = '▲ ' + fmt(lup.diff) + ' more than ' + (lup.low.shop || 'before');
+        mid.appendChild(ut);
       }
       if (l.qty > 1) {
         const calc = document.createElement('span');
@@ -2078,35 +2125,109 @@ async function readImage(img) {
     }
   });
 
-  /* ---------- Items you bought before: suggestions and price comparison ---------- */
+  /* ---------- Item details, things you bought before, and price comparison ---------- */
+  const CATS = ['Food', 'Drinks', 'Cleaning', 'Cosmetics', 'Medicine', 'Baby', 'Other'];
   const SHORT_DATE = { day: 'numeric', month: 'short' };
+  const norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  // "1.5 Ltrs", "1500ml" and "1.5l" all mean the same size.
+  function canonSize(s) {
+    const t = norm(s).replace(/\s+/g, '').replace(/,/g, '.');
+    const m = t.match(/^(\d+(?:\.\d+)?)([a-z]*)$/);
+    if (!m) return t;
+    let v = parseFloat(m[1]), u = m[2];
+    if (/^(ml|millil)/.test(u)) { v /= 1000; u = 'l'; }
+    else if (/^(l|ltr|litre|liter)/.test(u)) u = 'l';
+    else if (/^(g|gm|gms|gram)/.test(u)) { v /= 1000; u = 'kg'; }
+    else if (/^(kg|kgs|kilo)/.test(u)) u = 'kg';
+    else if (/^(pc|pcs|piece)/.test(u)) u = 'pc';
+    return String(Math.round(v * 1000) / 1000) + u;
+  }
+  // Old lines only have a note: treat the note as the item name.
+  function partsOf(l) {
+    if (!l) return { item: '', brand: '', size: '', cat: '' };
+    if (l.item || l.brand || l.size || l.cat) return { item: l.item || '', brand: l.brand || '', size: l.size || '', cat: l.cat || '' };
+    return { item: String(l.note || '').trim(), brand: '', size: '', cat: '' };
+  }
+  const nameOf = (p) => [p.item, p.brand, p.size].map((s) => String(s || '').trim()).filter(Boolean).join(' ');
+  const keyOf = (p) => (norm(p.item) || norm(p.brand)) ? [norm(p.item), norm(p.brand), canonSize(p.size)].join('|') : '';
+  const where = (b) => (b.shop ? ' at ' + b.shop : '') + (b.at ? ', ' + new Date(b.at).toLocaleDateString('en-GB', SHORT_DATE) : '');
+  let catCache = null, catSig = '';
+  const histSig = () => history.length + ':' + (history[0] ? history[0].id : '') + ':' + (history.length ? history[history.length - 1].id : '');
   function catalog() {
+    const sig = histSig();
+    if (catCache && sig === catSig) return catCache;
     const map = new Map();
     history.forEach((t) => (t.lines || []).forEach((l) => {
-      const name = String(l.note || '').trim();
-      if (!name || !(l.price > 0)) return;
-      const k = name.toLowerCase();
+      if (!(l.price > 0)) return;
+      const p = partsOf(l);
+      const k = keyOf(p);
+      if (!k) return;
       let e = map.get(k);
-      if (!e) { e = { name, buys: [] }; map.set(k, e); }
+      if (!e) { e = { key: k, parts: Object.assign({}, p), name: nameOf(p), buys: [] }; map.set(k, e); }
+      else if (!e.parts.cat && p.cat) e.parts.cat = p.cat;
       e.buys.push({ price: l.price, shop: t.shop || '', at: t.at || '' });
     }));
     map.forEach((e) => e.buys.sort((a, b) => String(b.at).localeCompare(String(a.at))));
+    catCache = map; catSig = sig;
     return map;
   }
-  const where = (b) => (b.shop ? ' at ' + b.shop : '') + (b.at ? ', ' + new Date(b.at).toLocaleDateString('en-GB', SHORT_DATE) : '');
+  // For each saved trip, which lines cost more than an earlier trip did.
+  let upCache = null, upSig = '';
+  function pricierByTrip() {
+    const sig = histSig();
+    if (upCache && sig === upSig) return upCache;
+    const best = new Map(), out = new Map();
+    for (let ti = history.length - 1; ti >= 0; ti--) {
+      const t = history[ti];
+      const marks = (t.lines || []).map((l) => {
+        const k = keyOf(partsOf(l));
+        const b = k ? best.get(k) : null;
+        return b && l.price > b.price ? { diff: l.price - b.price, shop: b.shop, price: b.price } : null;
+      });
+      (t.lines || []).forEach((l) => {
+        const k = keyOf(partsOf(l));
+        if (!k || !(l.price > 0)) return;
+        const b = best.get(k);
+        if (!b || l.price < b.price) best.set(k, { price: l.price, shop: t.shop || '' });
+      });
+      out.set(t.id, marks);
+    }
+    upCache = out; upSig = sig;
+    return out;
+  }
+  function compareInfo(p, price) {
+    const k = keyOf(p);
+    if (!k || !(price > 0)) return null;
+    const e = catalog().get(k);
+    if (!e) return null;
+    const low = e.buys.reduce((m, b) => (b.price < m.price ? b : m), e.buys[0]);
+    const here = state.shop ? e.buys.find((b) => b.shop && b.shop.toLowerCase() === state.shop.toLowerCase()) : null;
+    return { e, low, here, diff: price - low.price };
+  }
+  function priceWarning(p, price) {
+    const c = compareInfo(p, price);
+    if (!c || !(c.diff > 0)) return '';
+    return '▲ ' + (nameOf(p) || 'This') + ' is ' + fmt(c.diff) + ' more than' + (c.low.shop ? ' at ' + c.low.shop : ' before') + ' (' + fmt(c.low.price) + ')';
+  }
+  function warnBeep() {
+    if (!settings.feedback) return;
+    try { if (navigator.vibrate) navigator.vibrate([90, 70, 90]); } catch (e) {}
+    feedback();
+    setTimeout(() => { try { if (beepEl) beepEl.pause(); } catch (e) {} feedback(); }, 230);
+  }
   function suggestions(q) {
-    q = String(q || '').trim().toLowerCase();
+    q = norm(q);
     if (q.length < 2) return [];
-    const words = q.split(/\s+/);
+    const words = q.split(' ');
     const out = [];
-    catalog().forEach((e, k) => {
-      if (k === q) return; // already typed exactly
-      if (!words.every((w) => k.includes(w))) return;
-      const rank = k.startsWith(q) ? 0 : (' ' + k).includes(' ' + words[0]) ? 1 : 2;
+    catalog().forEach((e) => {
+      const hay = norm(e.name + ' ' + (e.parts.cat || ''));
+      if (!words.every((w) => hay.includes(w))) return;
+      const rank = norm(e.name).startsWith(q) ? 0 : (' ' + hay).includes(' ' + words[0]) ? 1 : 2;
       out.push({ e, rank, at: e.buys[0].at });
     });
     out.sort((a, b) => a.rank - b.rank || String(b.at).localeCompare(String(a.at)));
-    return out.slice(0, 6).map((x) => x.e);
+    return out.slice(0, 8).map((x) => x.e);
   }
   function showSug(input, box, onPick) {
     const list = suggestions(input.value);
@@ -2117,29 +2238,28 @@ async function readImage(img) {
       const b = document.createElement('button');
       b.type = 'button';
       const nm = document.createElement('b');
-      nm.textContent = e.name;
+      nm.textContent = (e.parts.cat ? e.parts.cat + ': ' : '') + e.name;
       const sm = document.createElement('small');
       sm.textContent = 'Last ' + fmt(last.price) + where(last) + (low.price < last.price ? '. Lowest ' + fmt(low.price) + (low.shop ? ' at ' + low.shop : '') : '');
       b.append(nm, sm);
       // pointerdown keeps the keyboard from closing before the tap lands
       b.addEventListener('pointerdown', (ev) => ev.preventDefault());
-      b.addEventListener('click', () => { input.value = e.name; box.hidden = true; onPick(e); });
+      b.addEventListener('click', () => { box.hidden = true; onPick(e); });
       box.appendChild(b);
     });
     box.hidden = list.length === 0;
   }
-  function renderCompare(el, note, price) {
-    const e = catalog().get(String(note || '').trim().toLowerCase());
-    if (!e || !(price > 0)) { el.hidden = true; return; }
-    const low = e.buys.reduce((m, b) => (b.price < m.price ? b : m), e.buys[0]);
-    const here = state.shop ? e.buys.find((b) => b.shop && b.shop.toLowerCase() === state.shop.toLowerCase()) : null;
+  function renderCompare(el, p, price) {
+    const c = compareInfo(p, price);
+    if (!c) { el.hidden = true; return; }
+    const { e, low, here } = c;
     let msg, cls;
-    if (price > low.price) {
+    if (c.diff > 0) {
       cls = 'up';
-      msg = fmt(price - low.price) + ' more than you paid' + where(low) + ' (' + fmt(low.price) + ')';
-    } else if (price < low.price) {
+      msg = '▲ Pricier: ' + fmt(c.diff) + ' more than you paid' + where(low) + ' (' + fmt(low.price) + ')';
+    } else if (c.diff < 0) {
       cls = 'down';
-      msg = 'Lowest price so far. Before: ' + fmt(e.buys[0].price) + where(e.buys[0]);
+      msg = '▼ Lowest price so far. Before: ' + fmt(e.buys[0].price) + where(e.buys[0]);
     } else {
       cls = 'same';
       msg = 'Same as your best price' + where(low);
@@ -2149,20 +2269,65 @@ async function readImage(img) {
     el.textContent = msg;
     el.hidden = false;
   }
-  $('fNote').addEventListener('input', () => {
-    showSug($('fNote'), $('noteSug'), (e) => {
-      // Typing a remembered item: offer its last price if the price box is still empty.
+  // Item name box + optional category chips, brand and size.
+  let detailsOpenPref = false;
+  try { detailsOpenPref = localStorage.getItem('trolley-calc.details.v1') === '1'; } catch (e) {}
+  function detailsUI(o) {
+    let cat = '';
+    const paint = () => Array.from($(o.p + 'Cats').children).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.c === cat)));
+    CATS.forEach((c) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.c = c;
+      b.textContent = c;
+      b.addEventListener('click', () => { cat = cat === c ? '' : c; paint(); o.onChange(); });
+      $(o.p + 'Cats').appendChild(b);
+    });
+    function open(v) {
+      $(o.p + 'Details').hidden = !v;
+      $(o.p + 'More').setAttribute('aria-expanded', String(v));
+      $(o.p + 'More').textContent = v ? '− Hide category, brand, size' : '+ Category, brand, size';
+    }
+    $(o.p + 'More').addEventListener('click', () => {
+      const v = $(o.p + 'Details').hidden;
+      open(v);
+      detailsOpenPref = v;
+      try { localStorage.setItem('trolley-calc.details.v1', v ? '1' : '0'); } catch (e) {}
+    });
+    const api = {
+      get() { const up1 = (v) => { v = v.trim(); return v.charAt(0).toUpperCase() + v.slice(1); }; return { item: up1(o.item.value), brand: up1($(o.p + 'Brand').value), size: $(o.p + 'Size').value.trim(), cat }; },
+      set(p) {
+        p = p || {};
+        o.item.value = p.item || '';
+        $(o.p + 'Brand').value = p.brand || '';
+        $(o.p + 'Size').value = p.size || '';
+        cat = p.cat || '';
+        paint();
+        open(detailsOpenPref || !!(p.brand || p.size || p.cat));
+      }
+    };
+    [$(o.p + 'Brand'), $(o.p + 'Size')].forEach((i) => i.addEventListener('input', () => o.onChange()));
+    o.item.addEventListener('input', () => {
+      showSug(o.item, o.sug, (e) => { api.set(e.parts); if (o.onPick) o.onPick(e); o.onChange(); });
+      o.onChange();
+    });
+    o.item.addEventListener('blur', () => { setTimeout(() => { o.sug.hidden = true; }, 150); });
+    return api;
+  }
+  const sheetDetails = detailsUI({
+    p: 'f', item: $('fNote'), sug: $('noteSug'),
+    onChange: () => update(),
+    onPick: (e) => {
+      // Picking a remembered item: offer its last price if the price box is still empty.
       if (!(num($('fAmt').value) > 0)) {
         const here = state.shop ? e.buys.find((b) => b.shop && b.shop.toLowerCase() === state.shop.toLowerCase()) : null;
         $('fAmt').value = numStr((here || e.buys[0]).price);
       }
-      update();
-    });
-    update();
+    }
   });
   $('fNote').addEventListener('blur', () => {
-    setTimeout(() => { $('noteSug').hidden = true; }, 150);
-    // Dictated "milk 290" into the note box: move the price where it belongs.
+    // Dictated "milk 290" into the item box: move the price where it belongs.
     if (!(num($('fAmt').value) > 0) && /\d/.test($('fNote').value)) {
       const r = parseSpoken($('fNote').value);
       if (r.price > 0) {
@@ -2174,11 +2339,10 @@ async function readImage(img) {
       }
     }
   });
-  $('cNote').addEventListener('input', () => {
-    showSug($('cNote'), $('cSug'), () => renderConfirm());
-    if (live.card) renderConfirm();
+  const cardDetails = detailsUI({
+    p: 'c', item: $('cNote'), sug: $('cSug'),
+    onChange: () => { if (live.card) renderConfirm(); }
   });
-  $('cNote').addEventListener('blur', () => { setTimeout(() => { $('cSug').hidden = true; }, 150); });
 
   /* ---------- Bill check ---------- */
   function renderBill() {
@@ -2400,21 +2564,21 @@ async function readImage(img) {
       box.appendChild(b);
     });
     $('confirmAltWrap').hidden = alts.length === 0;
-    $('cNote').value = '';
+    cardDetails.set(null);
     $('cSug').hidden = true;
     const recent = [];
     const seenNotes = new Set();
-    const pushNote = (n) => { const t = String(n || '').trim(); const k = t.toLowerCase(); if (t && !seenNotes.has(k) && recent.length < 6) { seenNotes.add(k); recent.push(t); } };
-    state.lines.slice().reverse().forEach((l) => pushNote(l.note));
-    history.forEach((t) => (t.lines || []).forEach((l) => pushNote(l.note)));
+    const pushNote = (l) => { const p = partsOf(l); const k = keyOf(p); if (k && !seenNotes.has(k) && recent.length < 6) { seenNotes.add(k); recent.push(p); } };
+    state.lines.slice().reverse().forEach(pushNote);
+    history.forEach((t) => (t.lines || []).forEach(pushNote));
     const rb = $('cRecent');
     rb.textContent = '';
-    recent.forEach((t) => {
+    recent.forEach((p) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip';
-      b.textContent = t;
-      b.addEventListener('click', () => { $('cNote').value = t; });
+      b.textContent = nameOf(p);
+      b.addEventListener('click', () => { cardDetails.set(p); renderConfirm(); });
       rb.appendChild(b);
     });
     rb.hidden = recent.length === 0;
@@ -2431,7 +2595,7 @@ async function readImage(img) {
     const lvl = budgetLevel(after);
     $('confirmQ').textContent = lvl === 'over' ? 'Add this? You will be ' + fmt(after - bud) + ' over budget' : lvl === 'near' ? 'Add this? Only ' + fmt(bud - after) + ' left after' : 'Add this price?';
     Array.from($('confirmAlts').children).forEach((b) => b.setAttribute('aria-pressed', String(num(b.dataset.v) === k.value)));
-    renderCompare($('cCmp'), $('cNote').value, k.value);
+    renderCompare($('cCmp'), cardDetails.get(), k.value);
   }
   function resumeLive(suppressMs) {
     const k = live.card;
@@ -2463,11 +2627,14 @@ async function readImage(img) {
   $('cYes').addEventListener('click', () => {
     const k = live.card;
     if (!k) return;
-    const note = $('cNote').value.trim().slice(0, 40);
-    try { $('cNote').blur(); } catch (e) {}
-    state.lines.push({ id: state.nextId++, price: k.value, qty: k.qty, note, thumb: k.thumb || '' });
+    const parts = cardDetails.get();
+    const note = nameOf(parts).slice(0, 60);
+    try { document.activeElement.blur(); } catch (e) {}
+    state.lines.push({ id: state.nextId++, price: k.value, qty: k.qty, note, item: parts.item, brand: parts.brand, size: parts.size, cat: parts.cat, thumb: k.thumb || '' });
+    const pw = priceWarning(parts, k.value);
     commit();
-    toast('Added ' + (note ? note + ' ' : '') + fmt(k.value * k.qty));
+    toast(pw || 'Added ' + (note ? note + ' ' : '') + fmt(k.value * k.qty), null, pw ? { warn: true } : null);
+    if (pw) warnBeep();
     resumeLive(6000);
   });
   $('cNo').addEventListener('click', () => { try { $('cNote').blur(); } catch (e) {} resumeLive(4000); });
