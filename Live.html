@@ -557,6 +557,33 @@ body{margin:0}
 .foot{grid-template-columns:minmax(0,2fr) minmax(0,1fr) 60px}
 .scan,.type{min-width:0;overflow:hidden;padding:0 8px}
 @media (max-width:359px){.scan svg{display:none}:root[lang="ur"] .scan,:root[lang="ur"] .type{font-size:15px}}
+
+/* Quick lists */
+.quick-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.quick-btn{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:start;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--ink)}
+.quick-btn b{font-size:16px;color:var(--accent)}
+.quick-btn small{font-size:13px;color:var(--muted);font-weight:600}
+.pick-sec{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:12px 0 2px}
+:root[lang="ur"] .pick-sec{text-transform:none;letter-spacing:0;font-size:14px}
+.pick-rows{display:flex;flex-direction:column}
+.li-row.off .li-name{color:var(--muted)}
+.li-row.off .li-check{background:var(--surface)}
+.li-row:not(.off) .li-check[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pick-bill{display:flex;flex-direction:column;gap:10px}
+.cmp-ref{margin-top:6px;padding-top:6px;border-top:1px solid currentColor;opacity:.9;font-weight:700}
+.trip-body .pill{align-self:flex-start;margin-top:6px}
+.photo-tips{margin:0;padding:0 0 0 18px;color:var(--muted);font-size:13px;line-height:1.45;display:flex;flex-direction:column;gap:3px}
+[dir="rtl"] .photo-tips{padding:0 18px 0 0}
+.rcpt-check{border-radius:12px;padding:9px 12px;font-size:13.5px;font-weight:700;line-height:1.4}
+.rcpt-check.ok{background:var(--accent-soft);color:var(--accent)}
+.rcpt-check.warn{background:var(--warn-soft);color:var(--warn)}
+.rcpt-more{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.rcpt-more small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.rcpt-more-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rcpt-more .btn{height:48px;font-size:15px;gap:8px;flex:1 1 220px;min-width:0}
+.rcpt-more .btn[hidden]{display:none}
+.rcpt-parts{font-size:13px;font-weight:800;color:var(--muted)}
+html[lang="ur"] .amount-field input::placeholder{font-size:20px;letter-spacing:0;font-family:"Noto Nastaliq Urdu",serif}
 </style>
 <style>body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -655,6 +682,17 @@ body{margin:0}
       </div>
       <button class="btn primary" type="submit" data-t>Add to list</button>
     </form>
+
+    <div class="card quick">
+      <div class="card-title" data-t>Start a list quickly</div>
+      <div class="quick-grid">
+        <button id="qsStarter" class="quick-btn" type="button"><b data-t>Ready-made monthly list</b><small data-t>Atta, cheeni, daal, oil and more, for your family size</small></button>
+        <button id="qsMonth" class="quick-btn" type="button"><b data-t>Repeat last month</b><small data-t>Everything you bought last month, added up</small></button>
+        <label class="quick-btn" for="pickBillFile"><b data-t>From an old bill</b><small data-t>Take a photo of any receipt</small></label>
+      </div>
+      <input id="pickBillFile" type="file" accept="image/*" hidden>
+      <p class="card-note" data-t>Tip: open any trip in Insights, History and tap "Use as shopping list".</p>
+    </div>
 
     <div id="usualWrap" class="card soft" hidden>
       <div class="card-title" data-t>Things you usually buy</div>
@@ -1052,6 +1090,11 @@ body{margin:0}
     </label>
     <input id="billCam" type="file" accept="image/*" capture="environment" hidden>
     <p class="card-note" data-t>Take a straight photo of the whole receipt in good light. The app finds items you did not scan and prices that are different.</p>
+    <ul class="photo-tips">
+      <li data-t>Lay the bill flat on a dark table, with no shadow or shine on it.</li>
+      <li data-t>Long bill? Take it in parts, from top to bottom. Start each photo two lines above where the last one ended.</li>
+      <li data-t>Check the bill on the day you shop. The print fades in a few weeks.</li>
+    </ul>
     <div class="or-line"><span data-t>or type the total</span></div>
     <div class="bill-sum"><span data-t>Your scans add up to</span><b id="billMine" class="num">0</b></div>
     <div class="amount-field">
@@ -1084,6 +1127,18 @@ body{margin:0}
       <span><i class="k diff"></i><span data-t>Price different</span></span>
       <span><i class="k unk"></i><span data-t>Could not read</span></span>
       <span><i class="k ok"></i><span data-t>Matches</span></span>
+    </div>
+    <div id="rcptMore" class="rcpt-more" hidden>
+      <div class="rcpt-more-row">
+        <label id="rcptMoreBtn" class="btn secondary" for="billCamMore">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span data-t>Add the next part of this bill</span>
+        </label>
+        <span id="rcptParts" class="rcpt-parts" hidden></span>
+        <button id="rcptUndoPart" class="pill" type="button" hidden data-t>Remove last part</button>
+      </div>
+      <small data-t>Bill longer than the photo? Start the next photo two lines above where this one ends.</small>
+      <input id="billCamMore" type="file" accept="image/*" capture="environment" hidden>
     </div>
     <div id="rcptLists" class="rcpt-lists"></div>
     <div class="actions even">
@@ -1124,6 +1179,10 @@ body{margin:0}
     </div>
     <div class="sec-lbl" data-t>Your data</div>
     <div class="menu-list">
+      <div id="cloudRow" class="set-row" hidden>
+        <label for="cloudToggle"><span class="t" data-t>Share prices with family and friends</span><small id="cloudInfo"></small></label>
+        <span class="switch"><input id="cloudToggle" type="checkbox" role="switch"><span></span></span>
+      </div>
       <button id="mBackup" class="menu-item" type="button">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
         <span><span data-t>Save backup</span><small data-t>Keep a copy of your list and history in Files or WhatsApp</small></span>
@@ -1133,6 +1192,15 @@ body{margin:0}
         <span><span data-t>Restore backup</span><small data-t>Bring back trips from a saved backup file</small></span>
       </label>
       <input id="restoreFile" type="file" accept=".json,application/json,text/plain" hidden>
+      <button id="mSharePrices" class="menu-item" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+        <span><span data-t>Share my prices</span><small data-t>Send your recent shop prices to family on WhatsApp. No names or personal details.</small></span>
+      </button>
+      <label class="menu-item" for="sharedFile" style="cursor:pointer">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 8v6M14 11h6"/></svg>
+        <span><span data-t>Add prices from family</span><small id="priceInfo"></small></span>
+      </label>
+      <input id="sharedFile" type="file" accept=".json,application/json,text/plain" hidden>
       <button id="mCsv" class="menu-item" type="button">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
         <span><span data-t>Export to Excel</span><small data-t>All items you bought, as a spreadsheet file (CSV)</small></span>
@@ -1167,6 +1235,56 @@ body{margin:0}
       <button class="theme-opt" type="button" data-pal="dark"><span class="sw" style="background:#0D1612"><i style="background:#FFE15A"></i></span><span data-t>Dark</span></button>
       <button class="theme-opt" type="button" data-pal="ocean"><span class="sw" style="background:#0B1E2D"><i style="background:#62CDEB"></i></span><span data-t>Ocean</span></button>
       <button class="theme-opt" type="button" data-pal="rose"><span class="sw" style="background:#FBF3F4"><i style="background:#A93A62"></i></span><span data-t>Rose</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick list picker -->
+<div id="pickWrap" class="sheet-wrap" hidden>
+  <button id="pickScrim" class="scrim" type="button" data-ta="Close" aria-label="Close"></button>
+  <div class="sheet tall" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <div class="sheet-head">
+      <h2 id="pickTitle"></h2>
+      <button id="pickClose" class="close-x" type="button" data-ta="Close" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <p id="pickNote" class="card-note"></p>
+    <div id="pickFamily" class="set-row" hidden>
+      <span class="t" data-t>People at home</span>
+      <div id="pickSizes" class="seg" role="group" data-ta="People at home" aria-label="People at home">
+        <button type="button" data-n="2">2</button><button type="button" data-n="4">4</button><button type="button" data-n="6">6</button><button type="button" data-n="8">8</button>
+      </div>
+    </div>
+    <div id="pickStatus" class="status" role="status" hidden></div>
+    <div id="pickBill" class="pick-bill" hidden>
+      <div id="pickMore" class="rcpt-more" hidden>
+        <div class="rcpt-more-row">
+          <label id="pickMoreBtn" class="btn secondary" for="pickBillMore">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span data-t>Add the next part of this bill</span>
+          </label>
+          <span id="pickParts" class="rcpt-parts" hidden></span>
+        </div>
+        <small data-t>Bill longer than the photo? Start the next photo two lines above where this one ends.</small>
+        <input id="pickBillMore" type="file" accept="image/*" hidden>
+      </div>
+      <div class="note-field"><label for="pickShop" data-t>Shop on the bill (optional)</label><input id="pickShop" type="text" dir="auto" autocomplete="off" maxlength="40" data-tp="e.g. Imtiaz, Al-Fatah, Carrefour" placeholder="e.g. Imtiaz, Al-Fatah, Carrefour"></div>
+      <div class="set-row">
+        <label for="pickSave"><span class="t" data-t>Also keep these prices</span><small data-t>Saves the bill in History so the app remembers what you paid</small></label>
+        <span class="switch"><input id="pickSave" type="checkbox" role="switch" checked><span></span></span>
+      </div>
+    </div>
+    <div class="tool-row">
+      <button id="pickAll" class="pill" type="button" data-t>Tick all</button>
+      <button id="pickNone" class="pill" type="button" data-t>Untick all</button>
+    </div>
+    <div id="pickRows" class="pick-rows"></div>
+    <div class="sheet-foot">
+      <div id="pickWarn" class="sheet-warn" hidden></div>
+      <div class="newtotal"><span id="pickCount"></span><b id="pickTotal" class="num"></b></div>
+      <div class="actions">
+        <button id="pickCancel" class="btn secondary" type="button" data-t>Cancel</button>
+        <button id="pickGo" class="btn primary" type="button"></button>
+      </div>
     </div>
   </div>
 </div>
@@ -1659,6 +1777,77 @@ async function readImage(img, opts) {
 
   // Urdu text for every English phrase in the app.
   const UR = {
+"{n} prices from 1 person": "1 شخص کی {n} قیمتیں",
+"Family and friends": "فیملی اور دوست",
+"Share prices with family and friends": "فیملی اور دوستوں سے قیمتیں شیئر کریں",
+"Off. Your prices stay on this phone.": "بند۔ آپ کی قیمتیں صرف اسی فون میں رہیں گی۔",
+"{n} prices from {p} people": "{p} لوگوں کی {n} قیمتیں",
+"On. Prices from your group will appear here.": "آن۔ آپ کے گروپ کی قیمتیں یہاں نظر آئیں گی۔",
+"{n} trip waiting to send": "{n} خریداری بھیجنا باقی",
+"{n} trips waiting to send": "{n} خریداریاں بھیجنا باقی",
+"Use as shopping list": "خریداری کی لسٹ بنائیں",
+"Price list: {x}": "ریٹ لسٹ: {x}",
+"Family": "فیملی",
+"another shop": "دوسری دکان",
+"Others paid {x} less: {p} at {w}": "دوسروں نے {x} کم دیے: {w} پر {p}",
+"Good price: others paid {p} at {w}": "اچھی قیمت: دوسروں نے {w} پر {p} دیے",
+"Same as others paid at {w}": "وہی قیمت جو دوسروں نے {w} پر دی",
+"{n} prices built in ({d})": "{n} قیمتیں ایپ میں موجود ({d})",
+"No prices to share yet. Save a few shopping trips first.": "ابھی بھیجنے کو قیمتیں نہیں۔ پہلے چند خریداریاں محفوظ کریں۔",
+"My shop prices": "میری دکانوں کی قیمتیں",
+"That file is not a Trolley Total prices file": "یہ ٹرالی ٹوٹل کی قیمتوں والی فائل نہیں ہے",
+"These prices were already added": "یہ قیمتیں پہلے سے موجود ہیں",
+"About {x} each": "تقریباً {x} فی عدد",
+"your price": "آپ کی قیمت",
+"No price yet": "ابھی قیمت نہیں",
+"This is {x} more than your monthly budget of {b}": "یہ {b} کے ماہانہ بجٹ سے {x} زیادہ ہے",
+"This uses {p}% of your monthly budget": "اس میں ماہانہ بجٹ کا {p}% لگے گا",
+"Add to my list": "میری لسٹ میں ڈالیں",
+"Ready-made monthly list": "تیار ماہانہ لسٹ",
+"A typical monthly list. Untick what you do not need and change the amounts. Prices are from Rawalpindi/Islamabad shops and your own shopping.": "ایک عام ماہانہ لسٹ۔ جو نہیں چاہیے اس کا نشان ہٹائیں اور تعداد بدلیں۔ قیمتیں راولپنڈی/اسلام آباد کی دکانوں اور آپ کی اپنی خریداری سے ہیں۔",
+"This trip has no item names to copy": "اس خریداری میں چیزوں کے نام نہیں ہیں",
+"Shopping list from this trip": "اس خریداری سے لسٹ",
+"the last 30 days": "پچھلے 30 دن",
+"No saved trips in the last month yet": "پچھلے مہینے کی کوئی خریداری محفوظ نہیں",
+"Those trips have no item names to copy": "ان خریداریوں میں چیزوں کے نام نہیں ہیں",
+"Repeat last month": "پچھلے مہینے والی لسٹ",
+"Everything you bought in {m} ({n}), added up.": "{m} میں خریدی گئی سب چیزیں ({n})، جوڑ کر۔",
+"List from an old bill": "پرانے بل سے لسٹ",
+"Items read from the bill. Untick anything you do not want.": "بل سے پڑھی گئی چیزیں۔ جو نہیں چاہیے اس کا نشان ہٹا دیں۔",
+"Reader could not start. Type the items instead.": "پڑھنے کا نظام شروع نہیں ہو سکا۔ چیزیں خود لکھیں۔",
+"Bill total {x}.": "بل کا ٹوٹل {x}۔",
+"Bill saved in History": "بل ریکارڈ میں محفوظ ہو گیا",
+"{n} from family": "فیملی سے {n}",
+"Added {n} price from family": "فیملی کی {n} قیمت شامل ہو گئی",
+"Added {n} prices from family": "فیملی کی {n} قیمتیں شامل ہو گئیں",
+"{n} item ticked": "{n} چیز چنی گئی",
+"{n} items ticked": "{n} چیزیں چنی گئیں",
+"{n} without a price": "{n} بغیر قیمت",
+"{n} item had no name and was left out.": "{n} چیز کا نام نہیں تھا اس لیے چھوڑ دی گئی۔",
+"{n} items had no name and were left out.": "{n} چیزوں کے نام نہیں تھے اس لیے چھوڑ دی گئیں۔",
+"Found {n} item on the bill.": "بل پر {n} چیز ملی۔",
+"Found {n} items on the bill.": "بل پر {n} چیزیں ملیں۔",
+"Added {n} item to your list": "لسٹ میں {n} چیز شامل ہو گئی",
+"Added {n} items to your list": "لسٹ میں {n} چیزیں شامل ہو گئیں",
+"Start a list quickly": "جلدی سے لسٹ بنائیں",
+"Atta, cheeni, daal, oil and more, for your family size": "آٹا، چینی، دال، تیل وغیرہ، گھر کے افراد کے حساب سے",
+"Everything you bought last month, added up": "پچھلے مہینے کی ساری خریداری، جوڑ کر",
+"From an old bill": "پرانے بل سے",
+"Take a photo of any receipt": "کسی بھی رسید کی تصویر لیں",
+"Tip: open any trip in Insights, History and tap \"Use as shopping list\".": "مشورہ: رپورٹ میں ریکارڈ کھولیں، کسی خریداری پر \"خریداری کی لسٹ بنائیں\" دبائیں۔",
+"Share my prices": "اپنی قیمتیں بھیجیں",
+"Send your recent shop prices to family on WhatsApp. No names or personal details.": "اپنی حالیہ قیمتیں واٹس ایپ پر فیملی کو بھیجیں۔ کوئی نام یا ذاتی معلومات نہیں جاتیں۔",
+"Add prices from family": "فیملی کی قیمتیں شامل کریں",
+"People at home": "گھر کے افراد",
+"Shop on the bill (optional)": "بل والی دکان (اختیاری)",
+"Also keep these prices": "یہ قیمتیں بھی محفوظ کریں",
+"Saves the bill in History so the app remembers what you paid": "بل ریکارڈ میں محفوظ ہو گا تاکہ ایپ کو یاد رہے آپ نے کیا دیا",
+"Tick all": "سب چنیں",
+"Untick all": "سب ہٹائیں",
+"Kitchen": "کچن",
+"Dairy and bakery": "دودھ، دہی اور بیکری",
+"Vegetables and meat": "سبزی اور گوشت",
+"Bathroom": "غسل خانہ",
 "Trolley Total": "ٹرالی ٹوٹل",
 "Trolley cleared": "ٹرالی صاف ہو گئی",
 "and your current trolley": "اور آپ کی موجودہ ٹرالی",
@@ -2095,7 +2284,24 @@ async function readImage(img, opts) {
 "Tag prices and GST": "ٹیگ کی قیمت اور جی ایس ٹی",
 "The price tag the camera read": "کیمرے کا پڑھا ہوا ٹیگ",
 "Your photo of the price tag": "قیمت کے ٹیگ کی تصویر",
-"Your receipt photo": "رسید کی تصویر"
+"Your receipt photo": "رسید کی تصویر",
+"Lay the bill flat on a dark table, with no shadow or shine on it.": "بل کو گہرے رنگ کی میز پر سیدھا رکھیں، اس پر سایہ یا چمک نہ ہو۔",
+"Long bill? Take it in parts, from top to bottom. Start each photo two lines above where the last one ended.": "لمبا بل؟ اوپر سے نیچے حصوں میں تصویریں لیں۔ ہر نئی تصویر پچھلی تصویر کے آخر سے دو لائنیں اوپر سے شروع کریں۔",
+"Check the bill on the day you shop. The print fades in a few weeks.": "بل خریداری کے دن ہی چیک کریں۔ چند ہفتوں میں چھپائی مدھم ہو جاتی ہے۔",
+"Add the next part of this bill": "اس بل کا اگلا حصہ شامل کریں",
+"Remove last part": "آخری حصہ ہٹائیں",
+"Bill longer than the photo? Start the next photo two lines above where this one ends.": "بل تصویر سے لمبا ہے؟ اگلی تصویر اس تصویر کے آخر سے دو لائنیں اوپر سے شروع کریں۔",
+"Reading part {p} of the bill… section {a} of {b}": "بل کا حصہ {p} پڑھا جا رہا ہے… ٹکڑا {a} از {b}",
+"That is the most parts one bill can have.": "ایک بل کے اس سے زیادہ حصے نہیں ہو سکتے۔",
+"This photo does not overlap the last one, so a line may be missing between them. Start each photo two lines above where the last one ended.": "یہ تصویر پچھلی تصویر سے نہیں ملتی، اس لیے درمیان کی کوئی لائن رہ گئی ہو سکتی ہے۔ ہر نئی تصویر پچھلی تصویر کے آخر سے دو لائنیں اوپر سے شروع کریں۔",
+"{n} part": "{n} حصہ",
+"{n} parts": "{n} حصے",
+"No total found on this photo. If the bill goes on, add the bottom part.": "اس تصویر میں کل رقم نہیں ملی۔ اگر بل آگے بھی ہے تو نیچے والا حصہ شامل کریں۔",
+"Every line was read: they add up to the receipt total.": "ہر لائن پڑھ لی گئی: ان کا جوڑ رسید کی کل رقم کے برابر ہے۔",
+"The lines read add up to {a}, but the receipt says {b}. {c} is not accounted for: a line was not read, or part of the bill is missing.": "پڑھی گئی لائنوں کا جوڑ {a} ہے، لیکن رسید پر {b} لکھا ہے۔ {c} کا حساب نہیں ملا: کوئی لائن پڑھی نہیں گئی، یا بل کا کچھ حصہ رہ گیا ہے۔",
+"The lines read add up to {a}, more than the receipt total {b}. There may be a discount, or a line was read twice.": "پڑھی گئی لائنوں کا جوڑ {a} ہے، جو رسید کی کل رقم {b} سے زیادہ ہے۔ شاید کوئی رعایت ہے، یا کوئی لائن دو بار پڑھی گئی۔",
+"No total found yet. If the bill goes on, add the next part.": "ابھی کل رقم نہیں ملی۔ اگر بل آگے بھی ہے تو اگلا حصہ شامل کریں۔",
+"Closer photos, in parts, read better.": "قریب سے، حصوں میں لی گئی تصویریں بہتر پڑھی جاتی ہیں۔"
 };
   /* ---------- Number reader (runs on the phone) ---------- */
   // Main reader: PaddleOCR in a background worker. Backup: Tesseract, if PaddleOCR cannot start.
@@ -2667,6 +2873,7 @@ async function readImage(img, opts) {
     const beforeShop = state.shop || '';
     history.unshift(trip);
     if (trip.shop) touchShop(trip.shop);
+    cloudShare(trip);
     if (history.length > 300) history.length = 300;
     saveHistory();
     const beforeBill = state.bill || '';
@@ -2681,6 +2888,7 @@ async function readImage(img, opts) {
       label: T('Undo'),
       fn: () => {
         history = history.filter((t) => t.id !== trip.id);
+        cloudUnshare(trip);
         saveHistory();
         state.lines = before;
         state.shop = beforeShop;
@@ -2756,6 +2964,12 @@ async function readImage(img, opts) {
           row.append(a, b);
           body.appendChild(row);
         });
+        const use = document.createElement('button');
+        use.type = 'button';
+        use.className = 'pill';
+        use.textContent = T('Use as shopping list');
+        use.addEventListener('click', () => openFromTrip(t));
+        body.appendChild(use);
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'trip-del' + (delArmed === t.id ? ' armed' : '');
@@ -2788,6 +3002,7 @@ async function readImage(img, opts) {
     $('mFinish').hidden = !has;
     $('mBill').hidden = !has;
     applyTheme(palette);
+    $('priceInfo').textContent = priceInfoText();
     $('menuWrap').hidden = false;
   }
   function closeMenu() { $('menuWrap').hidden = true; }
@@ -3029,6 +3244,7 @@ async function readImage(img, opts) {
     if (e.key !== 'Escape') return;
     if (!$('sheetWrap').hidden) closeSheet();
     else if (!$('budWrap').hidden) closeBud();
+    else if (!$('pickWrap').hidden) closePick();
     else if (!$('itemWrap').hidden) $('itemWrap').hidden = true;
     else if (!$('helpWrap').hidden) $('helpWrap').hidden = true;
     else if (!$('rcptWrap').hidden) $('rcptWrap').hidden = true;
@@ -3394,6 +3610,14 @@ async function readImage(img, opts) {
       const rank = norm(e.name).startsWith(q) ? 0 : (' ' + hay).includes(' ' + words[0]) ? 1 : 2;
       out.push({ e, rank, at: e.buys[0].at });
     });
+    // Then items from the price memory you have not bought yet.
+    const own = catalog();
+    memIndex().forEach((e) => {
+      if (own.has(e.key)) return;
+      const hay = norm(e.name + ' ' + (e.parts.cat || ''));
+      if (!words.every((w) => hay.includes(w))) return;
+      out.push({ e, rank: (norm(e.name).startsWith(q) ? 0 : 1) + 3, at: e.buys[0].at });
+    });
     out.sort((a, b) => a.rank - b.rank || String(b.at).localeCompare(String(a.at)));
     return out.slice(0, 8).map((x) => x.e);
   }
@@ -3409,7 +3633,8 @@ async function readImage(img, opts) {
       nm.textContent = (e.parts.cat ? CAT_LABEL(e.parts.cat) + ': ' : '') + e.name;
       const sm = document.createElement('small');
       const upr = unitPrice(e.parts.size, last.price);
-      sm.textContent = T('Last {x}', { x: fmt(last.price) }) + where(last) + (low.price < last.price ? STOP() + T('Lowest {x}', { x: fmt(low.price) }) + (low.shop ? ' ' + T('at {shop}', { shop: low.shop }) : '') : '') + (upr ? ' · ' + upr.text : '');
+      if (e.ref) sm.textContent = T('Price list: {x}', { x: fmt(low.price) }) + where(low) + (upr ? ' · ' + upr.text : '');
+      else sm.textContent = T('Last {x}', { x: fmt(last.price) }) + where(last) + (low.price < last.price ? STOP() + T('Lowest {x}', { x: fmt(low.price) }) + (low.shop ? ' ' + T('at {shop}', { shop: low.shop }) : '') : '') + (upr ? ' · ' + upr.text : '');
       b.append(nm, sm);
       // pointerdown keeps the keyboard from closing before the tap lands
       b.addEventListener('pointerdown', (ev) => ev.preventDefault());
@@ -3418,25 +3643,42 @@ async function readImage(img, opts) {
     });
     box.hidden = list.length === 0;
   }
-  function renderCompare(el, p, price) {
+  function renderCompare(box, p, price) {
     const c = compareInfo(p, price);
-    if (!c) { el.hidden = true; return; }
-    const { e, low, here } = c;
-    let msg, cls;
-    if (c.diff > 0) {
-      cls = 'up';
-      msg = '▲ ' + T('Pricier: {x} more than you paid', { x: fmt(c.diff) }) + where(low) + ' (' + fmt(low.price) + ')';
-    } else if (c.diff < 0) {
-      cls = 'down';
-      msg = '▼ ' + T('Lowest price so far. Before: {x}', { x: fmt(e.buys[0].price) }) + where(e.buys[0]);
-    } else {
-      cls = 'same';
-      msg = T('Same as your best price') + where(low);
+    const r = price > 0 ? refInfo(p) : null;
+    if (!c && !r) { box.hidden = true; return; }
+    box.textContent = '';
+    let cls = 'same';
+    if (c) {
+      const { e, low, here } = c;
+      let msg;
+      if (c.diff > 0) {
+        cls = 'up';
+        msg = '▲ ' + T('Pricier: {x} more than you paid', { x: fmt(c.diff) }) + where(low) + ' (' + fmt(low.price) + ')';
+      } else if (c.diff < 0) {
+        cls = 'down';
+        msg = '▼ ' + T('Lowest price so far. Before: {x}', { x: fmt(e.buys[0].price) }) + where(e.buys[0]);
+      } else {
+        msg = T('Same as your best price') + where(low);
+      }
+      if (here && here !== low && here.price !== price) msg += STOP() + T('Here last time: {x}', { x: fmt(here.price) });
+      box.appendChild(el('div', '', msg));
     }
-    if (here && here !== low && here.price !== price) msg += STOP() + T('Here last time: {x}', { x: fmt(here.price) });
-    el.className = 'cmp ' + cls;
-    el.textContent = msg;
-    el.hidden = false;
+    if (r) {
+      // What others paid (price memory): shown on its own line.
+      const d = price - r.low.price;
+      const who = r.low.fam ? T('Family and friends') : '';
+      const wh = (r.low.shop || T('another shop')) + COMMA() + dateStr(r.low.at, SHORT_DATE);
+      let msg;
+      if (d > 0.5) msg = T('Others paid {x} less: {p} at {w}', { x: fmt(d), p: fmt(r.low.price), w: wh });
+      else if (d < -0.5) msg = T('Good price: others paid {p} at {w}', { p: fmt(r.low.price), w: wh });
+      else msg = T('Same as others paid at {w}', { w: wh });
+      const line = el('div', c ? 'cmp-ref' : '', (who ? who + ': ' : '') + msg);
+      box.appendChild(line);
+      if (!c) cls = d > 0.5 ? 'up' : d < -0.5 ? 'down' : 'same';
+    }
+    box.className = 'cmp ' + cls;
+    box.hidden = false;
   }
   // Item name box + optional category chips, brand and size.
   let detailsOpenPref = false;
@@ -3495,7 +3737,7 @@ async function readImage(img, opts) {
     onChange: () => update(),
     onPick: (e) => {
       // Picking a remembered item: offer its last price if the price box is still empty.
-      if (!(num($('fAmt').value) > 0)) {
+      if (!e.ref && !(num($('fAmt').value) > 0)) {
         const here = state.shop ? e.buys.find((b) => b.shop && b.shop.toLowerCase() === state.shop.toLowerCase()) : null;
         $('fAmt').value = numStr((here || e.buys[0]).price);
       }
@@ -3929,6 +4171,7 @@ async function readImage(img, opts) {
     if (curTab === 'insights') renderInsights();
     if (curTab === 'shops') renderShopsTab();
     renderHelp();
+    if (!$('pickWrap').hidden) renderPick();
   }
 
   /* ---------- Help ---------- */
@@ -4020,7 +4263,7 @@ async function readImage(img, opts) {
 
   /* ---------- Shopping list ---------- */
   let lQty = 1;
-  const liName = (li) => nameOf(li) || '?';
+  const liName = (li) => (LANG === 'ur' && li.ur ? [li.ur, li.brand, li.size].filter(Boolean).join(' ') : nameOf(li)) || '?';
   // Does an item added to the trolley match a list item? "Milk" on the list matches any milk;
   // "Milk Olpers 1.5 L" on the list needs that brand and size.
   function listMatches(li, p) {
@@ -4076,7 +4319,7 @@ async function readImage(img, opts) {
   $('listStrip').addEventListener('click', () => showTab('list'));
 
   function addToList(p, qty) {
-    p = { item: p.item || '', brand: p.brand || '', size: p.size || '', cat: p.cat || '' };
+    p = { item: p.item || '', brand: p.brand || '', size: p.size || '', cat: p.cat || '', ur: p.ur || '' };
     if (!p.item && !p.brand) return false;
     const same = list.items.find((x) => !x.done && keyOf(x) === keyOf(p));
     if (same) same.qty += qty;
@@ -4115,6 +4358,13 @@ async function readImage(img, opts) {
         est += last.price * li.qty; priced++;
         let t = T('About {x}', { x: fmt(last.price) }) + (low.shop && low.price < last.price ? ' · ' + T('Lowest {x}', { x: fmt(low.price) }) + ' ' + T('at {shop}', { shop: low.shop }) : (last.shop ? ' ' + T('at {shop}', { shop: last.shop }) : ''));
         mid.appendChild(el('span', 'li-sub', t));
+      } else {
+        // Never bought it yourself: use the price memory.
+        const pr = priceFor(li);
+        if (pr) {
+          est += pr.price * li.qty; priced++;
+          mid.appendChild(el('span', 'li-sub', T('About {x}', { x: fmt(pr.price) }) + (pr.shop ? ' · ' + pr.shop : '')));
+        }
       }
       const step = el('div', 'stepper');
       const dec = el('button'); dec.type = 'button';
@@ -5189,41 +5439,245 @@ async function readImage(img, opts) {
     st.appendChild(document.createTextNode(text));
     st.hidden = !text;
   }
-  // Long receipts are read in overlapping strips so the small print stays sharp.
-  async function readReceiptLines(eng, c, token) {
+  /* --- Image helpers: find the paper, and darken faded print --- */
+  function grayData(c) {
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const g = new Uint8ClampedArray(c.width * c.height);
+    for (let i = 0, j = 0; i < g.length; i++, j += 4) g[i] = (d[j] * 299 + d[j + 1] * 587 + d[j + 2] * 114) / 1000;
+    return g;
+  }
+  function otsu(g) {
+    const h = new Array(256).fill(0);
+    for (let i = 0; i < g.length; i++) h[g[i]]++;
+    let sum = 0; for (let i = 0; i < 256; i++) sum += i * h[i];
+    let sB = 0, wB = 0, best = 0, th = 128;
+    for (let t = 0; t < 256; t++) {
+      wB += h[t]; if (!wB) continue;
+      const wF = g.length - wB; if (!wF) break;
+      sB += t * h[t];
+      const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) * (mB - mF);
+      if (v > best) { best = v; th = t; }
+    }
+    return th;
+  }
+  // The receipt is lighter than the table it lies on: keep just the paper, so its print gets all the pixels.
+  function findPaper(c) {
+    const k = Math.min(1, 320 / Math.max(c.width, c.height));
+    const sw = Math.max(1, Math.round(c.width * k)), sh = Math.max(1, Math.round(c.height * k));
+    const s = document.createElement('canvas'); s.width = sw; s.height = sh;
+    s.getContext('2d').drawImage(c, 0, 0, sw, sh);
+    const g = grayData(s), th = otsu(g);
+    const run = (n, frac) => {
+      let best = [0, n], bl = 0, st = -1;
+      for (let i = 0; i <= n; i++) {
+        if (i < n && frac(i) > 0.5) { if (st < 0) st = i; }
+        else if (st >= 0) { if (i - st > bl) { bl = i - st; best = [st, i]; } st = -1; }
+      }
+      return bl ? best : [0, n];
+    };
+    const [x0, x1] = run(sw, (x) => { let n = 0; for (let y = 0; y < sh; y++) if (g[y * sw + x] > th) n++; return n / sh; });
+    const [y0, y1] = run(sh, (y) => { let n = 0; for (let x = x0; x < x1; x++) if (g[y * sw + x] > th) n++; return n / Math.max(1, x1 - x0); });
+    if (x1 - x0 < sw * 0.15 || y1 - y0 < sh * 0.15) return { x: 0, y: 0, w: c.width, h: c.height };
+    const mx = (x1 - x0) * 0.03 + 2, my = (y1 - y0) * 0.01 + 2;
+    const X0 = Math.max(0, (x0 - mx) / k), Y0 = Math.max(0, (y0 - my) / k);
+    const X1 = Math.min(c.width, (x1 + mx) / k), Y1 = Math.min(c.height, (y1 + my) / k);
+    return { x: Math.round(X0), y: Math.round(Y0), w: Math.round(X1 - X0), h: Math.round(Y1 - Y0) };
+  }
+  const crop = (c, r) => { const o = document.createElement('canvas'); o.width = r.w; o.height = r.h; o.getContext('2d').drawImage(c, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h); return o; };
+  // Faded thermal print: flatten the paper's shading, then stretch so faint grey digits turn black.
+  function faded(g) {
+    const h = new Array(256).fill(0);
+    for (let i = 0; i < g.length; i += 3) h[g[i]]++;
+    const n = Math.ceil(g.length / 3), at = (q) => { let a = 0; for (let v = 0; v < 256; v++) { a += h[v]; if (a >= n * q) return v; } return 255; };
+    return at(0.5) - at(0.03) < 110;
+  }
+  function enhance(c, g) {
+    const w = c.width, hgt = c.height, r = Math.max(12, Math.round(w / 40));
+    const S = new Float64Array((w + 1) * (hgt + 1));
+    for (let y = 0; y < hgt; y++) { let row = 0; for (let x = 0; x < w; x++) { row += g[y * w + x]; S[(y + 1) * (w + 1) + x + 1] = S[y * (w + 1) + x + 1] + row; } }
+    const v = new Float32Array(w * hgt), hist = new Array(256).fill(0);
+    for (let y = 0; y < hgt; y++) {
+      const ya = Math.max(0, y - r), yb = Math.min(hgt, y + r + 1);
+      for (let x = 0; x < w; x++) {
+        const xa = Math.max(0, x - r), xb = Math.min(w, x + r + 1);
+        const bg = (S[yb * (w + 1) + xb] - S[ya * (w + 1) + xb] - S[yb * (w + 1) + xa] + S[ya * (w + 1) + xa]) / ((yb - ya) * (xb - xa));
+        const q = Math.min(1.5, g[y * w + x] / Math.max(8, bg * 1.08));
+        v[y * w + x] = q;
+        hist[Math.min(255, Math.round(q * 170))]++;
+      }
+    }
+    const tot = w * hgt, pct = (p) => { let a = 0; for (let i = 0; i < 256; i++) { a += hist[i]; if (a >= tot * p) return i / 170; } return 1.5; };
+    const lo = pct(0.015), hi = Math.max(lo + 0.05, pct(0.5));
+    const o = document.createElement('canvas'); o.width = w; o.height = hgt;
+    const ctx = o.getContext('2d'), id = ctx.createImageData(w, hgt), d = id.data;
+    for (let i = 0, j = 0; i < v.length; i++, j += 4) {
+      const t = Math.max(0, Math.min(1, (v[i] - lo) / (hi - lo)));
+      const val = Math.round(Math.pow(t, 1.6) * 255);
+      d[j] = d[j + 1] = d[j + 2] = val; d[j + 3] = 255;
+    }
+    ctx.putImageData(id, 0, 0);
+    return o;
+  }
+  const lineOverlap = (o, b) => {
+    const w = Math.min(o.x1, b.x1) - Math.max(o.x0, b.x0), h = Math.min(o.y1, b.y1) - Math.max(o.y0, b.y0);
+    return w > 0 && h > 0 ? (w * h) / Math.min((o.x1 - o.x0) * (o.y1 - o.y0), (b.x1 - b.x0) * (b.y1 - b.y0)) : 0;
+  };
+  const avgConf = (ls) => (ls.length ? ls.reduce((a, l) => a + (l.conf == null ? 0.8 : l.conf), 0) / ls.length : 0);
+  // Keep, for each spot, the clearer of two readings.
+  function mergeReadings(a, b) {
+    const out = a.slice();
+    b.forEach((l) => {
+      if (!l.bbox) return;
+      const i = out.findIndex((o) => o.bbox && lineOverlap(o.bbox, l.bbox) > 0.5);
+      if (i < 0) out.push(l);
+      else if ((l.conf || 0) > (out[i].conf || 0) + 0.03) out[i] = l;
+    });
+    return out;
+  }
+  // Read a receipt in overlapping strips, each enlarged so the print is about 1,000 pixels wide.
+  async function readReceiptLines(eng, c, isLive, onStatus) {
     const W = c.width, H = c.height;
-    const th = Math.round(W * 0.8);
+    const sc = Math.max(0.4, Math.min(2.2, 1000 / W));
+    const th = Math.round(900 / sc);
     const tiles = [];
     if (H <= th * 1.2) tiles.push([0, H]);
-    else { const step = Math.round(th * 0.78); for (let y = 0; y < H; y += step) { const y1 = Math.min(H, y + th); tiles.push([Math.max(0, y1 - th), y1]); if (y1 >= H) break; } }
+    else { const step = Math.round(th * 0.8); for (let y = 0; y < H; y += step) { const y1 = Math.min(H, y + th); tiles.push([Math.max(0, y1 - th), y1]); if (y1 >= H) break; } }
     const out = [];
     for (let i = 0; i < tiles.length; i++) {
-      if (token !== rcptToken) return null;
-      rcptStatus(tiles.length > 1 ? T('Reading the receipt… part {a} of {b}', { a: i + 1, b: tiles.length }) : T('Reading the receipt…'), 'busy');
+      if (!isLive()) return null;
+      onStatus(i + 1, tiles.length);
       const [y0, y1] = tiles[i];
-      const sc = Math.min(2, 960 / Math.max(W, y1 - y0));
       const t = document.createElement('canvas');
       t.width = Math.round(W * sc); t.height = Math.round((y1 - y0) * sc);
       const ctx = t.getContext('2d');
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(c, 0, y0, W, y1 - y0, 0, 0, t.width, t.height);
-      const lines = await eng.read(t, { maxBoxes: 160 });
+      const g = grayData(t);
+      const isFaded = faded(g);
+      const opts = { maxBoxes: 200, cap: 1280 };
+      let lines = await eng.read(isFaded ? enhance(t, g) : t, opts);
+      // Unsure? Read the other version too and keep the clearer reading of each line.
+      if (avgConf(lines) < 0.82 && isLive()) {
+        const other = await eng.read(isFaded ? t : enhance(t, g), opts);
+        lines = mergeReadings(lines, other);
+      }
       lines.forEach((l) => {
         if (!l.bbox) return;
         const b = { x0: l.bbox.x0 / sc, x1: l.bbox.x1 / sc, y0: l.bbox.y0 / sc + y0, y1: l.bbox.y1 / sc + y0 };
         // Lines cut by the strip edge are read again whole in the next strip.
         if (i < tiles.length - 1 && b.y1 > y1 - 4) return;
         if (i > 0 && b.y0 < y0 + 4) return;
-        const dup = out.find((o) => {
-          const w = Math.min(o.bbox.x1, b.x1) - Math.max(o.bbox.x0, b.x0), h = Math.min(o.bbox.y1, b.y1) - Math.max(o.bbox.y0, b.y0);
-          return w > 0 && h > 0 && (w * h) / Math.min((o.bbox.x1 - o.bbox.x0) * (o.bbox.y1 - o.bbox.y0), (b.x1 - b.x0) * (b.y1 - b.y0)) > 0.5;
-        });
-        if (dup) { if ((l.text || '').length > dup.text.length) { dup.text = l.text; dup.bbox = b; dup.conf = l.conf; } return; }
+        const dup = out.find((o) => lineOverlap(o.bbox, b) > 0.5);
+        if (dup) { if ((l.conf || 0) > dup.conf + 0.03 || (Math.abs((l.conf || 0) - dup.conf) <= 0.03 && (l.text || '').length > dup.text.length)) { dup.text = l.text; dup.bbox = b; dup.conf = l.conf; } return; }
         out.push({ text: String(l.text || ''), conf: l.conf == null ? 0.8 : l.conf, bbox: b });
       });
     }
     return out;
   }
+  // One photo of (part of) a bill → its rows, placed on a common 800-pixel-wide strip.
+  const PART_W = 800;
+  async function readReceiptPart(file, isLive, onStatus) {
+    let full, eng;
+    try { full = await loadBig(file, 3600); } catch (e) { throw new Error('open'); }
+    const paper = crop(full, findPaper(full));
+    full.width = full.height = 1; // free the big photo
+    try { eng = await getReader(); } catch (e) { throw new Error('reader'); }
+    const lines = await readReceiptLines(eng, paper, isLive, onStatus);
+    if (!lines) return null;
+    const k = PART_W / paper.width;
+    const view = document.createElement('canvas');
+    view.width = PART_W; view.height = Math.max(1, Math.round(paper.height * k));
+    view.getContext('2d').drawImage(paper, 0, 0, view.width, view.height);
+    lines.forEach((l) => { l.bbox = { x0: l.bbox.x0 * k, x1: l.bbox.x1 * k, y0: l.bbox.y0 * k, y1: l.bbox.y1 * k }; });
+    const rows = lines.length ? groupRows(lines) : [];
+    parseRows(rows);
+    return { view, rows };
+  }
+  /* --- Join the parts of a long bill, dropping the lines that both photos show --- */
+  const bigrams = (s) => { const o = new Map(); for (let i = 0; i < s.length - 1; i++) { const b = s.slice(i, i + 2); o.set(b, (o.get(b) || 0) + 1); } return o; };
+  function dice(a, b) {
+    if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+    const A = bigrams(a), B = bigrams(b);
+    let n = 0; A.forEach((v, k) => { n += Math.min(v, B.get(k) || 0); });
+    return (2 * n) / (a.length - 1 + b.length - 1);
+  }
+  const sigOf = (r) => norm(r.text).replace(/[^a-z0-9]/g, '');
+  function sameRow(a, b) {
+    if (a.p && b.p && a.p.amount != null && b.p.amount != null && Math.abs(a.p.amount - b.p.amount) > 0.01) return false;
+    return dice(sigOf(a), sigOf(b)) >= 0.6;
+  }
+  // Line up the top of the new photo with the bottom of the last one. A line misread in one photo is allowed.
+  function joinRows(prev, next) {
+    let best = null;
+    for (let j = Math.max(0, prev.length - 40); j < prev.length; j++) {
+      let a = j, b = 0, n = 0, miss = 0, ok = true;
+      const subs = [];
+      while (a < prev.length && b < next.length) {
+        if (sameRow(prev[a], next[b])) { n++; a++; b++; continue; }
+        if (++miss > 1 + (n >> 2)) { ok = false; break; }
+        if (b + 1 < next.length && sameRow(prev[a], next[b + 1])) { b++; continue; }
+        if (a + 1 < prev.length && sameRow(prev[a + 1], next[b])) { a++; continue; }
+        subs.push([a, b]); a++; b++;
+      }
+      if (!ok || !n) continue;
+      // Enough lines in common: two or more, or the very last line only.
+      if (n < 2 && !(j === prev.length - 1)) continue;
+      if (n < (prev.length - j) * 0.4) continue;
+      if (!best || n > best.n) best = { n, j, cut: b, subs };
+    }
+    if (!best) return { rows: prev.concat(next), overlap: 0 };
+    const out = prev.slice();
+    // A line half cut off at the photo edge: keep whichever photo read it more clearly.
+    best.subs.forEach(([a, b]) => { if ((next[b].conf || 0) > (out[a].conf || 0) + 0.05 && next[b].p && next[b].p.letters >= (out[a].p ? out[a].p.letters : 0)) out[a] = next[b]; });
+    return { rows: out.concat(next.slice(best.cut)), overlap: best.n };
+  }
+  /* --- A long bill in several photos: stack them, one under the other --- */
+  const PART_GAP = 16;
+  function shiftRow(r, dy) {
+    const sh = (b) => { b.y0 += dy; b.y1 += dy; };
+    sh(r.bbox); r.parts.forEach((x) => sh(x.bbox)); r.cy += dy;
+  }
+  function addPart(parts, part) {
+    const last = parts[parts.length - 1];
+    part.y = last ? last.y + last.view.height + PART_GAP : 0;
+    part.rows.forEach((r) => shiftRow(r, part.y));
+    parts.push(part);
+  }
+  function joinParts(parts) {
+    let rows = [];
+    parts.forEach((p, i) => {
+      if (!i) { rows = p.rows.slice(); p.overlap = null; return; }
+      const j = joinRows(rows, p.rows);
+      rows = j.rows; p.overlap = j.overlap;
+    });
+    return rows;
+  }
+  function partsImage(parts) {
+    const last = parts[parts.length - 1];
+    const H = last.y + last.view.height;
+    // Keep the picture small enough for a phone's memory.
+    const s = Math.min(1, Math.sqrt(9e6 / (PART_W * H)));
+    const c = document.createElement('canvas');
+    c.width = Math.round(PART_W * s); c.height = Math.max(1, Math.round(H * s));
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+    parts.forEach((p) => ctx.drawImage(p.view, 0, Math.round(p.y * s), c.width, Math.round(p.view.height * s)));
+    return { url: c.toDataURL('image/jpeg', 0.8), w: PART_W, h: H };
+  }
+  const MAX_PARTS = 6;
+  // Read one more photo of a bill and add it to the parts. Throws 'open' or 'reader'; returns false if cancelled.
+  async function readBillPhoto(file, parts, isLive, say) {
+    const n = parts.length + 1;
+    say(T('Opening the photo…'));
+    if (!worker) say(T('Getting ready (first scan only)…'));
+    const part = await readReceiptPart(file, isLive, (i, k) => say(
+      n > 1 ? T('Reading part {p} of the bill… section {a} of {b}', { p: n, a: i, b: k })
+        : k > 1 ? T('Reading the receipt… part {a} of {b}', { a: i, b: k }) : T('Reading the receipt…')));
+    if (!part || !isLive()) return false;
+    addPart(parts, part);
+    return true;
+  }
+
   // Group pieces of text into receipt rows (same height on the page).
   function groupRows(lines) {
     const hs = lines.map((l) => l.bbox.y1 - l.bbox.y0).sort((a, b) => a - b);
@@ -5288,9 +5742,14 @@ async function readImage(img, opts) {
     }
     return out;
   }
-  function analyseReceipt(rows) {
+  function parseRows(rows) {
+    if (!rows.length) return;
     const minX = Math.min.apply(null, rows.map((r) => r.bbox.x0)), maxX = Math.max.apply(null, rows.map((r) => r.bbox.x1));
     rows.forEach((r) => { r.p = parseRow(r, minX, maxX); });
+  }
+  function analyseReceipt(rows) {
+    if (rows.some((r) => !r.p)) parseRows(rows);
+    rows.forEach((r) => { delete r._used; });
     // The total
     let total = null, totalRank = 0, totalRow = -1, subtotal = null;
     rows.forEach((r, i) => {
@@ -5387,38 +5846,63 @@ async function readImage(img, opts) {
     return res;
   }
 
-  let rcptToken = 0;
-  async function scanReceipt(file) {
+  let rcptToken = 0, rcptParts = [];
+  async function scanReceipt(file, more) {
     const token = ++rcptToken;
+    const live = () => token === rcptToken;
+    if (!more || !rcptParts.length) rcptParts = [];
     $('billWrap').hidden = true;
     $('rcptWrap').hidden = false;
-    $('rcptSummary').hidden = true;
-    $('rcptLegend').hidden = true;
-    $('rcptLists').textContent = '';
-    $('rcptMarks').textContent = '';
-    $('rcptImg').removeAttribute('src');
-    rcptStatus(T('Opening the photo…'), 'busy');
-    let c;
-    try { c = await loadBig(file, 2200); } catch (e) { rcptStatus(T('Could not open the photo. Try again.'), 'warn'); return; }
-    if (token !== rcptToken) return;
-    $('rcptImg').src = c.toDataURL('image/jpeg', 0.8);
-    $('rcptImg').dataset.w = c.width; $('rcptImg').dataset.h = c.height;
-    let eng;
-    try {
-      if (!worker) rcptStatus(T('Getting ready (first scan only)…'), 'busy');
-      eng = await getReader();
-    } catch (e) { rcptStatus(T('Reader could not start. Type the receipt total instead.'), 'warn'); return; }
-    let lines;
-    try { lines = await readReceiptLines(eng, c, token); } catch (e) { lines = null; }
-    if (token !== rcptToken) return;
-    if (!lines || !lines.length) { rcptStatus(T('Could not read this receipt. Take a closer, straighter photo in good light.'), 'warn'); return; }
-    const res = matchReceipt(analyseReceipt(groupRows(lines)));
-    rcpt = res;
-    if (!res.items.length) { rcptStatus(T('No items found on this photo. Make sure the whole receipt is in the picture and the print is sharp.'), 'warn'); return; }
-    rcptStatus('', '');
-    if (res.total) { state.bill = String(res.total); save(); render(); }
-    drawRcpt();
+    $('rcptMore').hidden = true;
+    if (!rcptParts.length) {
+      $('rcptSummary').hidden = true;
+      $('rcptLegend').hidden = true;
+      $('rcptLists').textContent = '';
+      $('rcptMarks').textContent = '';
+      $('rcptImg').removeAttribute('src');
+    }
+    if (rcptParts.length >= MAX_PARTS) { rcptStatus(T('That is the most parts one bill can have.'), 'warn'); showRcptMore(); return; }
+    let ok;
+    try { ok = await readBillPhoto(file, rcptParts, live, (t) => { if (live()) rcptStatus(t, 'busy'); }); }
+    catch (e) {
+      if (!live()) return;
+      rcptStatus(e && e.message === 'open' ? T('Could not open the photo. Try again.') : e && e.message === 'reader' ? T('Reader could not start. Type the receipt total instead.') : T('Could not read this receipt. Take a closer, straighter photo in good light.'), 'warn');
+      showRcptMore();
+      return;
+    }
+    if (!ok || !live()) return;
+    const added = rcptParts[rcptParts.length - 1];
+    if (!added.rows.length) {
+      rcptParts.pop();
+      rcptStatus(T('Could not read this receipt. Take a closer, straighter photo in good light.'), 'warn');
+      showRcptMore();
+      return;
+    }
+    analyseParts();
+    if (!rcpt.items.length) {
+      rcptStatus(T('No items found on this photo. Make sure the whole receipt is in the picture and the print is sharp.'), 'warn');
+      showRcptMore();
+      return;
+    }
+    rcptStatus(rcptParts.length > 1 && added.overlap === 0 ? T('This photo does not overlap the last one, so a line may be missing between them. Start each photo two lines above where the last one ended.') : '', rcptParts.length > 1 && added.overlap === 0 ? 'warn' : '');
     feedback();
+  }
+  function analyseParts() {
+    const img = partsImage(rcptParts);
+    $('rcptImg').src = img.url;
+    $('rcptImg').dataset.w = img.w; $('rcptImg').dataset.h = img.h;
+    rcpt = matchReceipt(analyseReceipt(joinParts(rcptParts)));
+    if (rcpt.total) { state.bill = String(rcpt.total); save(); render(); }
+    drawRcpt();
+    showRcptMore();
+  }
+  function showRcptMore() {
+    const n = rcptParts.length;
+    $('rcptMore').hidden = !n;
+    $('rcptParts').textContent = n > 1 ? plural(n, '{n} part', '{n} parts') : '';
+    $('rcptParts').hidden = n < 2;
+    $('rcptUndoPart').hidden = n < 2;
+    $('rcptMoreBtn').hidden = n >= MAX_PARTS;
   }
   function drawRcpt() {
     const res = rcpt;
@@ -5464,6 +5948,18 @@ async function readImage(img, opts) {
     if (res.unknown.length || res.items.some((x) => x.unclear && x.status !== 'ok')) smallBits.push(T('some lines could not be read'));
     if (smallBits.length) verdict.appendChild(el('small', '', smallBits.join(COMMA())));
     sum.appendChild(verdict);
+    // Self-check: do the lines read add up to the receipt's own total?
+    const read = Math.round(res.items.reduce((a, x) => a + x.amount, 0) * 100) / 100;
+    const base = res.subtotal != null && Math.abs(res.subtotal - read) < Math.abs((res.total || 0) - read) ? res.subtotal : res.total;
+    let chk;
+    if (!base) chk = el('div', 'rcpt-check warn', T('No total found on this photo. If the bill goes on, add the bottom part.'));
+    else {
+      const gap = Math.round((base - read) * 100) / 100;
+      if (Math.abs(gap) <= Math.max(1, base * 0.005)) chk = el('div', 'rcpt-check ok', '✓ ' + T('Every line was read: they add up to the receipt total.'));
+      else if (gap > 0) chk = el('div', 'rcpt-check warn', T('The lines read add up to {a}, but the receipt says {b}. {c} is not accounted for: a line was not read, or part of the bill is missing.', { a: fmt(read), b: fmt(base), c: fmt(gap) }) + (rcptParts.length === 1 ? ' ' + T('Closer photos, in parts, read better.') : ''));
+      else chk = el('div', 'rcpt-check warn', T('The lines read add up to {a}, more than the receipt total {b}. There may be a discount, or a line was read twice.', { a: fmt(read), b: fmt(base) }));
+    }
+    sum.appendChild(chk);
     sum.hidden = false;
     // Lists
     const box = $('rcptLists');
@@ -5524,12 +6020,558 @@ async function readImage(img, opts) {
   $('billCam').addEventListener('change', (e) => {
     const f = e.target.files && e.target.files[0];
     e.target.value = '';
-    if (f) scanReceipt(f);
+    if (f) scanReceipt(f, false);
   });
-  const closeRcpt = () => { rcptToken++; $('rcptWrap').hidden = true; };
+  $('billCamMore').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (f) scanReceipt(f, true);
+  });
+  $('rcptUndoPart').addEventListener('click', () => {
+    if (rcptParts.length < 2) return;
+    rcptToken++;
+    rcptParts.pop();
+    rcptStatus('', '');
+    analyseParts();
+  });
+  const closeRcpt = () => { rcptToken++; $('rcptWrap').hidden = true; if (!rcpt) rcptParts = []; };
   $('rcptClose').addEventListener('click', closeRcpt);
   $('rcptScrim').addEventListener('click', closeRcpt);
   $('rcptDone').addEventListener('click', () => { closeRcpt(); if (state.lines.length) openBill(); });
+
+  /* ---------- Built-in price memory (Rawalpindi / Islamabad) and the ready-made monthly list ---------- */
+  // Sources: Al-Fatah online store (11 Oct 2026) and the government weekly SPI average (8 Oct 2026).
+  const PRICE_SEED = {"v": "2026-10-11", "city": "Rawalpindi/Islamabad", "items": [{"i": "Atta", "b": "Sunny White", "s": "5 kg", "c": "Food", "p": 845, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Atta", "b": "Ghiza Chakki", "s": "5 kg", "c": "Food", "p": 945, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Atta", "b": "Grain", "s": "10 kg", "c": "Food", "p": 1675, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Atta", "b": "", "s": "20 kg", "c": "Food", "p": 2851, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Sugar", "b": "", "s": "1 kg", "c": "Food", "p": 150, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Sugar", "b": "", "s": "2 kg", "c": "Food", "p": 300, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Sugar", "b": "", "s": "1 kg", "c": "Food", "p": 143, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Cooking oil", "b": "Dalda", "s": "5 L", "c": "Food", "p": 3030, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Cooking oil", "b": "Dalda", "s": "3 L", "c": "Food", "p": 1915, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Cooking oil", "b": "Dalda", "s": "1 L", "c": "Food", "p": 620, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Cooking oil", "b": "Sufi Canola", "s": "1 L", "c": "Food", "p": 595, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Cooking oil", "b": "Seasons Canola", "s": "4.5 L", "c": "Food", "p": 2695, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Cooking oil", "b": "Mezan", "s": "1 L", "c": "Food", "p": 575, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ghee", "b": "Kashmir", "s": "2.5 kg", "c": "Food", "p": 1545, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ghee", "b": "Kashmir", "s": "1 kg", "c": "Food", "p": 610, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ghee", "b": "Kashmir", "s": "5 kg", "c": "Food", "p": 3095, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ghee", "b": "Canolive", "s": "1 kg", "c": "Food", "p": 565, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ghee", "b": "Mezan", "s": "1 kg", "c": "Food", "p": 530, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Rice", "b": "Guard Supreme", "s": "1 kg", "c": "Food", "p": 520, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Rice", "b": "FF Arome", "s": "5 kg", "c": "Food", "p": 2345, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Rice", "b": "Falak", "s": "10 kg", "c": "Food", "p": 5195, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Rice", "b": "Falak Bachat", "s": "5 kg", "c": "Food", "p": 1365, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Daal masoor", "b": "", "s": "1 kg", "c": "Food", "p": 490, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Daal masoor", "b": "", "s": "1 kg", "c": "Food", "p": 266, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Daal chana", "b": "", "s": "1 kg", "c": "Food", "p": 285, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Daal chana", "b": "", "s": "1 kg", "c": "Food", "p": 286, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Daal moong", "b": "", "s": "1 kg", "c": "Food", "p": 354, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "White chana", "b": "", "s": "1 kg", "c": "Food", "p": 285, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tea", "b": "Tapal Danedar", "s": "430 g", "c": "Drinks", "p": 945, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tea", "b": "Tapal Danedar", "s": "170 g", "c": "Drinks", "p": 395, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tea", "b": "Tapal Danedar", "s": "350 g", "c": "Drinks", "p": 745, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tea", "b": "Tapal Danedar", "s": "1.6 kg", "c": "Drinks", "p": 3195, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tea", "b": "Tapal Danedar", "s": "440 g", "c": "Drinks", "p": 1195, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Salt", "b": "National", "s": "800 g", "c": "Food", "p": 75, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Salt", "b": "Shan", "s": "800 g", "c": "Food", "p": 75, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Red chilli powder", "b": "National", "s": "200 g", "c": "Food", "p": 375, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Red chilli powder", "b": "National", "s": "100 g", "c": "Food", "p": 195, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Red chilli powder", "b": "National", "s": "400 g", "c": "Food", "p": 720, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Haldi", "b": "Shan", "s": "100 g", "c": "Food", "p": 246, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Biryani masala", "b": "Shan", "s": "4 x 60 g", "c": "Food", "p": 595, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Biryani masala", "b": "Shan", "s": "50 g", "c": "Food", "p": 160, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ketchup", "b": "Knorr", "s": "800 g", "c": "Food", "p": 420, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ketchup", "b": "Knorr", "s": "400 g", "c": "Food", "p": 240, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Ketchup", "b": "National", "s": "800 g", "c": "Food", "p": 319, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Milk", "b": "Nestle MilkPak", "s": "1 L", "c": "Food", "p": 350, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Milk", "b": "Olpers", "s": "1.5 L", "c": "Food", "p": 515, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Milk", "b": "Olpers", "s": "250 ml", "c": "Food", "p": 93, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Eggs", "b": "Farm Fresh", "s": "12 pcs", "c": "Food", "p": 340, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Eggs", "b": "Prema", "s": "12 pcs", "c": "Food", "p": 365, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Eggs", "b": "Farm Fresh", "s": "30 pcs", "c": "Food", "p": 845, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Bread", "b": "Aroma", "s": "Large", "c": "Food", "p": 218, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Yogurt", "b": "Farm Pure", "s": "500 g", "c": "Food", "p": 200, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Yogurt", "b": "Nestle", "s": "400 g", "c": "Food", "p": 265, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Onions", "b": "", "s": "1 kg", "c": "Food", "p": 209, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tomatoes", "b": "", "s": "1 kg", "c": "Food", "p": 155, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Potatoes", "b": "", "s": "1 kg", "c": "Food", "p": 50, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Chicken", "b": "", "s": "1 kg", "c": "Food", "p": 383, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Bananas", "b": "", "s": "1 dozen", "c": "Food", "p": 135, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Gur", "b": "", "s": "1 kg", "c": "Food", "p": 228, "sh": "Govt average (SPI)", "d": "2026-10-08"}, {"i": "Pepsi", "b": "", "s": "1.5 L", "c": "Drinks", "p": 165, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Pepsi", "b": "", "s": "2.25 L", "c": "Drinks", "p": 230, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Washing powder", "b": "Surf Excel", "s": "1 kg", "c": "Cleaning", "p": 575, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Washing powder", "b": "Surf Excel", "s": "2 kg", "c": "Cleaning", "p": 1175, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Washing powder", "b": "Surf Excel", "s": "4.5 kg", "c": "Cleaning", "p": 2595, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Washing powder", "b": "Surf Excel", "s": "500 g", "c": "Cleaning", "p": 310, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Dishwash bar", "b": "Lemon Max", "s": "290 g", "c": "Cleaning", "p": 105, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Dishwash liquid", "b": "Lemon Max", "s": "750 ml", "c": "Cleaning", "p": 420, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Toilet cleaner", "b": "Harpic", "s": "750 ml", "c": "Cleaning", "p": 695, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Tissue", "b": "Rose Petal", "s": "300 sheets", "c": "Cleaning", "p": 275, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Soap", "b": "Lifebuoy", "s": "128 g", "c": "Cosmetics", "p": 130, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Soap", "b": "Lifebuoy", "s": "3 x 128 g", "c": "Cosmetics", "p": 380, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Shampoo", "b": "Sunsilk", "s": "360 ml", "c": "Cosmetics", "p": 775, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Shampoo", "b": "Sunsilk", "s": "185 ml", "c": "Cosmetics", "p": 475, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Shampoo", "b": "Sunsilk", "s": "660 ml", "c": "Cosmetics", "p": 1345, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Toothpaste", "b": "Colgate", "s": "150 ml", "c": "Cosmetics", "p": 325, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Diapers", "b": "Molfix", "s": "50 pcs", "c": "Baby", "p": 2649, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Diapers", "b": "Molfix", "s": "25 pcs", "c": "Baby", "p": 1695, "sh": "Al-Fatah online", "d": "2026-10-11"}, {"i": "Baby wipes", "b": "Pampers", "s": "52 pcs", "c": "Baby", "p": 645, "sh": "Al-Fatah online", "d": "2026-10-11"}]};
+  const STARTER = [{"sec": "Kitchen", "items": [{"i": "Atta", "b": "Sunny White", "s": "5 kg", "c": "Food", "q": 4, "ur": "آٹا", "on": true}, {"i": "Sugar", "b": "", "s": "1 kg", "c": "Food", "q": 4, "ur": "چینی", "on": true}, {"i": "Cooking oil", "b": "Dalda", "s": "5 L", "c": "Food", "q": 1, "ur": "کوکنگ آئل", "on": true}, {"i": "Ghee", "b": "Kashmir", "s": "2.5 kg", "c": "Food", "q": 1, "ur": "گھی", "on": false}, {"i": "Rice", "b": "Guard Supreme", "s": "1 kg", "c": "Food", "q": 5, "ur": "چاول", "on": true}, {"i": "Daal masoor", "b": "", "s": "1 kg", "c": "Food", "q": 1, "ur": "دال مسور", "on": true}, {"i": "Daal chana", "b": "", "s": "1 kg", "c": "Food", "q": 1, "ur": "دال چنا", "on": true}, {"i": "Daal moong", "b": "", "s": "1 kg", "c": "Food", "q": 1, "ur": "دال مونگ", "on": true}, {"i": "White chana", "b": "", "s": "1 kg", "c": "Food", "q": 1, "ur": "سفید چنے", "on": true}, {"i": "Besan", "b": "", "s": "1 kg", "c": "Food", "q": 1, "ur": "بیسن", "on": false}, {"i": "Tea", "b": "Tapal Danedar", "s": "430 g", "c": "Drinks", "q": 2, "ur": "چائے کی پتی", "on": true}, {"i": "Salt", "b": "National", "s": "800 g", "c": "Food", "q": 1, "ur": "نمک", "on": true}, {"i": "Red chilli powder", "b": "National", "s": "200 g", "c": "Food", "q": 1, "ur": "لال مرچ", "on": true}, {"i": "Haldi", "b": "Shan", "s": "100 g", "c": "Food", "q": 1, "ur": "ہلدی", "on": true}, {"i": "Biryani masala", "b": "Shan", "s": "4 x 60 g", "c": "Food", "q": 1, "ur": "بریانی مصالحہ", "on": true}, {"i": "Ketchup", "b": "Knorr", "s": "800 g", "c": "Food", "q": 1, "ur": "کیچپ", "on": false}]}, {"sec": "Dairy and bakery", "items": [{"i": "Milk", "b": "Nestle MilkPak", "s": "1 L", "c": "Food", "q": 4, "ur": "دودھ (ڈبہ)", "on": true}, {"i": "Eggs", "b": "Farm Fresh", "s": "12 pcs", "c": "Food", "q": 2, "ur": "انڈے", "on": true}, {"i": "Bread", "b": "Aroma", "s": "Large", "c": "Food", "q": 4, "ur": "ڈبل روٹی", "on": true}, {"i": "Yogurt", "b": "Farm Pure", "s": "500 g", "c": "Food", "q": 4, "ur": "دہی", "on": true}]}, {"sec": "Vegetables and meat", "items": [{"i": "Onions", "b": "", "s": "1 kg", "c": "Food", "q": 5, "ur": "پیاز", "on": true}, {"i": "Tomatoes", "b": "", "s": "1 kg", "c": "Food", "q": 3, "ur": "ٹماٹر", "on": true}, {"i": "Potatoes", "b": "", "s": "1 kg", "c": "Food", "q": 5, "ur": "آلو", "on": true}, {"i": "Chicken", "b": "", "s": "1 kg", "c": "Food", "q": 4, "ur": "مرغی", "on": true}]}, {"sec": "Drinks", "items": [{"i": "Pepsi", "b": "", "s": "1.5 L", "c": "Drinks", "q": 2, "ur": "پیپسی", "on": false}]}, {"sec": "Cleaning", "items": [{"i": "Washing powder", "b": "Surf Excel", "s": "1 kg", "c": "Cleaning", "q": 2, "ur": "سرف", "on": true}, {"i": "Dishwash bar", "b": "Lemon Max", "s": "290 g", "c": "Cleaning", "q": 3, "ur": "برتن دھونے کی ٹکی", "on": true}, {"i": "Toilet cleaner", "b": "Harpic", "s": "750 ml", "c": "Cleaning", "q": 1, "ur": "ٹوائلٹ کلینر", "on": true}, {"i": "Tissue", "b": "Rose Petal", "s": "300 sheets", "c": "Cleaning", "q": 2, "ur": "ٹشو", "on": true}]}, {"sec": "Bathroom", "items": [{"i": "Soap", "b": "Lifebuoy", "s": "128 g", "c": "Cosmetics", "q": 4, "ur": "نہانے کا صابن", "on": true}, {"i": "Shampoo", "b": "Sunsilk", "s": "360 ml", "c": "Cosmetics", "q": 1, "ur": "شیمپو", "on": true}, {"i": "Toothpaste", "b": "Colgate", "s": "150 ml", "c": "Cosmetics", "q": 2, "ur": "ٹوتھ پیسٹ", "on": true}]}, {"sec": "Baby", "items": [{"i": "Diapers", "b": "Molfix", "s": "50 pcs", "c": "Baby", "q": 2, "ur": "پیمپرز", "on": false}, {"i": "Baby wipes", "b": "Pampers", "s": "52 pcs", "c": "Baby", "q": 2, "ur": "بچوں کے وائپس", "on": false}]}];
+  /* ---------- Price memory: built-in prices, a newer prices.json, and prices shared by family ---------- */
+  const BOOK_KEY = 'trolley-calc.pricebook.v1', SHARED_KEY = 'trolley-calc.shared.v1';
+  let priceBook = load(BOOK_KEY, null);
+  if (!priceBook || !Array.isArray(priceBook.items) || String(priceBook.v) < PRICE_SEED.v) priceBook = PRICE_SEED;
+  let sharedPrices = load(SHARED_KEY, []);
+  if (!Array.isArray(sharedPrices)) sharedPrices = [];
+  const daysAgo = (d) => (Date.now() - new Date(d).getTime()) / 864e5;
+  // Prices from everyone in the group, downloaded from the shared database (see 17-cloud.js).
+  const CLOUD_KEY = 'trolley-calc.cloud.v1';
+  let cloudData = load(CLOUD_KEY, null);
+  if (!cloudData || !Array.isArray(cloudData.trips)) cloudData = { last: '', trips: [] };
+  let myDev = '';
+  try { myDev = localStorage.getItem('trolley-calc.device.v1') || ''; if (!myDev) { myDev = 'd' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); localStorage.setItem('trolley-calc.device.v1', myDev); } } catch (e) { myDev = 'd' + Math.random().toString(36).slice(2, 12); }
+  let memCache = null, memSig = '';
+  function memIndex() {
+    const sig = priceBook.v + ':' + sharedPrices.length + ':' + cloudData.trips.length;
+    if (memCache && memSig === sig) return memCache;
+    const m = new Map();
+    const add = (x, fam) => {
+      if (!x || !(Number(x.p) > 0)) return;
+      const parts = { item: String(x.i || ''), brand: String(x.b || ''), size: String(x.s || ''), cat: String(x.c || '') };
+      const k = keyOf(parts);
+      if (!k) return;
+      let e = m.get(k);
+      if (!e) { e = { key: k, parts, name: nameOf(parts), buys: [], ref: true }; m.set(k, e); }
+      e.buys.push({ price: Number(x.p), shop: String(x.sh || ''), at: String(x.d || ''), qty: 1, fam: !!fam });
+    };
+    priceBook.items.forEach((x) => add(x, false));
+    sharedPrices.forEach((x) => add(x, true));
+    cloudData.trips.forEach((t) => {
+      if (t.dev === myDev) return; // your own trips are already in your history
+      (t.items || []).forEach((x) => add({ i: x.i, b: x.b, s: x.s, c: x.c, p: x.p, sh: t.shop, d: t.d }, true));
+    });
+    m.forEach((e) => e.buys.sort((a, b) => String(b.at).localeCompare(String(a.at))));
+    memCache = m; memSig = sig;
+    return m;
+  }
+  // What others paid for exactly this item (same name, brand and size).
+  function refInfo(p) {
+    const k = keyOf(p || {});
+    if (!k) return null;
+    const e = memIndex().get(k);
+    if (!e || !e.buys.length) return null;
+    const recent = e.buys.filter((b) => daysAgo(b.at) <= 60);
+    let use = recent.length ? recent : e.buys;
+    // Ignore prices far from the rest (usually a misread, like 5150 for 515).
+    if (use.length >= 3) {
+      const sorted = use.map((b) => b.price).sort((a, b) => a - b);
+      const med = sorted[Math.floor(sorted.length / 2)];
+      const ok = use.filter((b) => b.price >= med * 0.5 && b.price <= med * 2);
+      if (ok.length) use = ok;
+    }
+    const low = use.reduce((m, b) => (b.price < m.price ? b : m), use[0]);
+    return { e, latest: use[0], low };
+  }
+  // Best guess of what an item costs: your own last price first, then the price memory.
+  function priceFor(p) {
+    const k = keyOf(p);
+    const own = k ? catalog().get(k) : null;
+    if (own) return { price: own.buys[0].price, own: true, shop: own.buys[0].shop, at: own.buys[0].at };
+    const r = refInfo(p);
+    if (r) return { price: r.low.price, own: false, shop: r.low.shop, at: r.low.at };
+    if (p.brand || p.size) return null;
+    // Only a name, like "Milk": use the version you buy most, else the cheapest in the price memory.
+    const e = entryForListItem(p);
+    if (e) return { price: e.buys[0].price, own: true, shop: e.buys[0].shop, at: e.buys[0].at };
+    let best = null;
+    memIndex().forEach((m) => { if (listMatches(p, m.parts)) { const b = m.buys[0]; if (!best || b.price < best.price) best = b; } });
+    return best ? { price: best.price, own: false, shop: best.shop, at: best.at } : null;
+  }
+  // A newer prices.json next to the app (on GitHub) replaces the built-in list.
+  (async () => {
+    try {
+      if (!/^https?:$/.test(location.protocol)) return;
+      const r = await fetch('prices.json', { cache: 'no-cache' });
+      if (!r.ok) return;
+      const j = await r.json();
+      if (j && Array.isArray(j.items) && String(j.v) > String(priceBook.v)) { priceBook = j; store(BOOK_KEY, j); memCache = null; }
+    } catch (e) {}
+  })();
+  function priceInfoText() {
+    const fam = sharedPrices.length;
+    return T('{n} prices built in ({d})', { n: priceBook.items.length, d: dateStr(priceBook.v, { day: 'numeric', month: 'short' }) }) + (fam ? ' · ' + plural(fam, '{n} from family', '{n} from family') : '');
+  }
+
+  /* --- Share prices with family and friends (a small file, no names or personal details) --- */
+  const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function myPricesData() {
+    const best = new Map();
+    history.forEach((t) => {
+      if (daysAgo(t.at) > 120) return;
+      (t.lines || []).forEach((l) => {
+        const p = partsOf(l);
+        const k = keyOf(p);
+        if (!k || !(l.price > 0)) return;
+        const kk = k + '@' + String(t.shop || '').toLowerCase();
+        const d = String(t.at).slice(0, 10);
+        const prev = best.get(kk);
+        if (!prev || d > prev.d) best.set(kk, { i: p.item, b: p.brand, s: p.size, c: p.cat, p: l.price, sh: t.shop || '', d });
+      });
+    });
+    return { app: 'Trolley Total prices', v: 1, city: 'Rawalpindi/Islamabad', at: todayStr(), items: Array.from(best.values()) };
+  }
+  async function shareFile(name, data, mime, title) {
+    try {
+      const file = new File([data], name, { type: mime });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title }); return true; }
+    } catch (e) { if (e && e.name === 'AbortError') return true; }
+    try {
+      const url = URL.createObjectURL(new Blob([data], { type: mime }));
+      const a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast(T('Saved to Downloads'));
+      return true;
+    } catch (e) { toast(T('Could not save the file here')); return false; }
+  }
+  $('mSharePrices').addEventListener('click', async () => {
+    closeMenu();
+    const d = myPricesData();
+    if (!d.items.length) { toast(T('No prices to share yet. Save a few shopping trips first.')); return; }
+    await shareFile('trolley-prices-' + d.at + '.json', JSON.stringify(d), 'application/json', T('My shop prices'));
+  });
+  // Add prices a friend sent you (their shared prices file, or a backup file).
+  function importPrices(b) {
+    let rows = [];
+    if (b && b.app === 'Trolley Total prices' && Array.isArray(b.items)) rows = b.items;
+    else if (b && b.app === 'Trolley Total' && Array.isArray(b.history)) {
+      b.history.forEach((t) => (t && Array.isArray(t.lines) ? t.lines : []).forEach((l) => {
+        const p = partsOf(l);
+        if (keyOf(p) && l.price > 0) rows.push({ i: p.item, b: p.brand, s: p.size, c: p.cat, p: l.price, sh: t.shop || '', d: String(t.at || '').slice(0, 10) });
+      }));
+    } else return -1;
+    const have = new Set(sharedPrices.map((x) => [x.i, x.b, x.s, x.sh, x.d, x.p].join('|').toLowerCase()));
+    let added = 0;
+    rows.forEach((x) => {
+      if (!x || !(Number(x.p) > 0) || !(x.i || x.b)) return;
+      const r = { i: String(x.i || '').slice(0, 40), b: String(x.b || '').slice(0, 30), s: String(x.s || '').slice(0, 15), c: String(x.c || ''), p: Number(x.p), sh: String(x.sh || '').slice(0, 40), d: String(x.d || '').slice(0, 10) };
+      const k = [r.i, r.b, r.s, r.sh, r.d, r.p].join('|').toLowerCase();
+      if (have.has(k)) return;
+      have.add(k);
+      sharedPrices.push(r);
+      added++;
+    });
+    // Keep the newest 3,000 shared prices.
+    sharedPrices.sort((a, b) => String(b.d).localeCompare(String(a.d)));
+    if (sharedPrices.length > 3000) sharedPrices.length = 3000;
+    store(SHARED_KEY, sharedPrices);
+    memCache = null;
+    return added;
+  }
+  $('sharedFile').addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    closeMenu();
+    let n = -1;
+    try { n = importPrices(JSON.parse(await f.text())); } catch (err) { n = -1; }
+    if (n < 0) { toast(T('That file is not a Trolley Total prices file')); return; }
+    toast(n ? plural(n, 'Added {n} price from family', 'Added {n} prices from family') : T('These prices were already added'));
+    render();
+  });
+
+  /* ---------- Quick lists: ready-made monthly list, repeat a trip or last month, rebuild from an old bill ---------- */
+  const pick = { mode: '', rows: [], size: 4, total: 0, token: 0 };
+  const capWords = (s) => String(s || '').toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase());
+  const rowName = (p) => (LANG === 'ur' && p.ur ? [p.ur, p.brand, p.size].filter(Boolean).join(' ') : nameOf(p));
+
+  function openPick(mode, title, note, rows) {
+    pick.mode = mode;
+    pick.rows = rows;
+    $('pickTitle').textContent = title;
+    $('pickNote').textContent = note || '';
+    $('pickNote').hidden = !note;
+    $('pickFamily').hidden = mode !== 'starter';
+    $('pickBill').hidden = mode !== 'bill';
+    $('pickStatus').hidden = true;
+    $('pickWrap').hidden = false;
+    renderPick();
+    const sh = $('pickWrap').querySelector('.sheet');
+    if (sh) sh.scrollTop = 0;
+  }
+  const closePick = () => { pick.token++; $('pickWrap').hidden = true; };
+  function pickStatus(text, kind) {
+    const st = $('pickStatus');
+    st.className = 'status' + (kind && kind !== 'busy' ? ' ' + kind : '');
+    st.textContent = '';
+    if (kind === 'busy') st.appendChild(Object.assign(el('span', 'spin'), { ariaHidden: 'true' }));
+    st.appendChild(document.createTextNode(text));
+    st.hidden = !text;
+  }
+  function renderPick() {
+    const box = $('pickRows');
+    box.textContent = '';
+    let sec = null, total = 0, on = 0, unknown = 0;
+    pick.rows.forEach((r) => {
+      if (r.sec && r.sec !== sec) { sec = r.sec; box.appendChild(el('div', 'pick-sec', T(sec))); }
+      const pr = r.price > 0 ? { price: r.price, own: true } : priceFor(r);
+      if (r.on) { on++; if (pr) total += pr.price * r.qty; else unknown++; }
+      const row = el('div', 'li-row' + (r.on ? '' : ' off'));
+      const chk = el('button', 'li-check');
+      chk.type = 'button';
+      chk.setAttribute('role', 'checkbox');
+      chk.setAttribute('aria-checked', String(!!r.on));
+      chk.setAttribute('aria-label', rowName(r));
+      chk.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+      const toggle = () => { r.on = !r.on; renderPick(); };
+      chk.addEventListener('click', toggle);
+      const mid = el('button', 'li-mid');
+      mid.type = 'button';
+      mid.addEventListener('click', toggle);
+      mid.appendChild(el('span', 'li-name', rowName(r)));
+      let sub = '';
+      if (pr) sub = T('About {x} each', { x: fmt(pr.price) }) + (pr.own ? (r.price > 0 ? '' : ' · ' + T('your price')) : (pr.shop ? ' · ' + pr.shop : ''));
+      else sub = T('No price yet');
+      mid.appendChild(el('span', 'li-sub', sub));
+      const step = el('div', 'stepper');
+      const dec = el('button'); dec.type = 'button'; dec.innerHTML = ICON_MINUS; dec.setAttribute('aria-label', T('One less'));
+      dec.addEventListener('click', () => { r.qty = Math.max(1, r.qty - 1); renderPick(); });
+      const q = el('span', 'q num', String(r.qty));
+      const inc = el('button'); inc.type = 'button'; inc.innerHTML = ICON_PLUS; inc.setAttribute('aria-label', T('One more'));
+      inc.addEventListener('click', () => { r.qty += 1; renderPick(); });
+      step.append(dec, q, inc);
+      row.append(chk, mid, step);
+      box.appendChild(row);
+    });
+    pick.total = total;
+    $('pickTotal').textContent = '≈ ' + fmt0(total);
+    $('pickCount').textContent = plural(on, '{n} item ticked', '{n} items ticked') + (unknown ? ' · ' + plural(unknown, '{n} without a price', '{n} without a price') : '');
+    $('pickGo').textContent = mode2label();
+    $('pickGo').disabled = on === 0;
+    const mb = num(settings.monthBudget);
+    const w = $('pickWarn');
+    if (pick.mode !== 'bill' && mb > 0 && total > mb) {
+      w.className = 'sheet-warn over';
+      w.textContent = T('This is {x} more than your monthly budget of {b}', { x: fmt0(total - mb), b: fmt0(mb) });
+      w.hidden = false;
+    } else if (pick.mode !== 'bill' && mb > 0 && total >= mb * NEAR) {
+      w.className = 'sheet-warn near';
+      w.textContent = T('This uses {p}% of your monthly budget', { p: Math.round((total / mb) * 100) });
+      w.hidden = false;
+    } else w.hidden = true;
+    document.querySelectorAll('#pickSizes button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.n) === pick.size)));
+  }
+  function mode2label() { return T('Add to my list'); }
+
+  /* --- Ready-made monthly list --- */
+  function starterRows(size) {
+    const rows = [];
+    STARTER.forEach((s) => s.items.forEach((x) => rows.push({ item: x.i, brand: x.b, size: x.s, cat: x.c, ur: x.ur, base: x.q, qty: Math.max(1, Math.round((x.q * size) / 4)), on: x.on, sec: s.sec })));
+    return rows;
+  }
+  function openStarter() {
+    pick.size = Number(settings.family) || 4;
+    openPick('starter', T('Ready-made monthly list'), T('A typical monthly list. Untick what you do not need and change the amounts. Prices are from Rawalpindi/Islamabad shops and your own shopping.'), starterRows(pick.size));
+  }
+  document.querySelectorAll('#pickSizes button').forEach((b) => b.addEventListener('click', () => {
+    pick.size = Number(b.dataset.n);
+    settings.family = pick.size; saveSettings();
+    // Keep ticks, recalculate amounts for the new family size.
+    pick.rows.forEach((r) => { if (r.base) r.qty = Math.max(1, Math.round((r.base * pick.size) / 4)); });
+    renderPick();
+  }));
+
+  /* --- Repeat a past trip, or the whole of last month --- */
+  function rowsFromLines(lines) {
+    const m = new Map();
+    lines.forEach((l) => {
+      const p = partsOf(l);
+      const k = keyOf(p);
+      if (!k) return;
+      const r = m.get(k);
+      if (r) r.qty += l.qty || 1;
+      else m.set(k, { item: p.item, brand: p.brand, size: p.size, cat: p.cat, qty: l.qty || 1, on: true });
+    });
+    return Array.from(m.values());
+  }
+  function openFromTrip(t) {
+    const rows = rowsFromLines(t.lines || []);
+    const nameless = (t.lines || []).filter((l) => !keyOf(partsOf(l))).length;
+    if (!rows.length) { toast(T('This trip has no item names to copy')); return; }
+    openPick('trip', T('Shopping list from this trip'), (t.shop ? t.shop + COMMA() : '') + dateStr(t.at, { day: 'numeric', month: 'long' }) + (nameless ? STOP() + plural(nameless, '{n} item had no name and was left out.', '{n} items had no name and were left out.') : ''), rows);
+  }
+  function openLastMonth() {
+    const now = new Date();
+    const prevM = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    let trips = history.filter((t) => { const d = new Date(t.at); return d.getFullYear() === prevM.getFullYear() && d.getMonth() === prevM.getMonth(); });
+    let label = dateStr(prevM, { month: 'long', year: 'numeric' });
+    if (!trips.length) { trips = history.filter((t) => daysAgo(t.at) <= 31); label = T('the last 30 days'); }
+    if (!trips.length) { toast(T('No saved trips in the last month yet')); return; }
+    const rows = rowsFromLines([].concat.apply([], trips.map((t) => t.lines || [])));
+    if (!rows.length) { toast(T('Those trips have no item names to copy')); return; }
+    rows.sort((a, b) => b.qty - a.qty);
+    openPick('month', T('Repeat last month'), T('Everything you bought in {m} ({n}), added up.', { m: label, n: plural(trips.length, '{n} trip', '{n} trips') }), rows);
+  }
+
+  /* --- Rebuild a list from an old bill --- */
+  // "OLPERS MILK 1.5 LTR" -> item "Olpers Milk", size "1.5 L".
+  const BILL_UNITS = { ml: 'ml', ltr: 'L', lt: 'L', l: 'L', litre: 'L', liter: 'L', kg: 'kg', kgs: 'kg', gm: 'g', gms: 'g', g: 'g', gram: 'g', pcs: 'pcs', pc: 'pcs' };
+  function billParts(it) {
+    const split = (s) => String(s || '').replace(/([a-z])(\d)/gi, '$1 $2').replace(/(\d)([a-z])/gi, '$1 $2');
+    const m = split(it.text).match(/(\d+(?:\.\d+)?)\s*(ml|ltr|lt|litre|liter|l|kgs|kg|gms|gm|gram|g|pcs|pc)\b/i);
+    const size = m ? m[1] + ' ' + BILL_UNITS[m[2].toLowerCase()] : '';
+    const seen = new Set();
+    const words = split(it.name).split(/\s+/).filter((w) => {
+      const k = w.toLowerCase();
+      if (!w || /^\d+(\.\d+)?$/.test(w) || BILL_UNITS[k] || seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    return { item: capWords(words.join(' ')).slice(0, 40) || capWords(it.name).slice(0, 40), size };
+  }
+  async function openFromBill(file, more) {
+    const token = ++pick.token;
+    const live = () => token === pick.token && !$('pickWrap').hidden;
+    if (!more || !pick.parts || !pick.parts.length || pick.mode !== 'bill') {
+      openPick('bill', T('List from an old bill'), T('Items read from the bill. Untick anything you do not want.'), []);
+      pick.token = token;
+      pick.parts = [];
+      $('pickShop').value = state.shop || '';
+      $('pickSave').checked = true;
+    }
+    $('pickMore').hidden = true;
+    const say = (t) => { if (live()) pickStatus(t, 'busy'); };
+    let ok;
+    try { ok = pick.parts.length < MAX_PARTS && await readBillPhoto(file, pick.parts, live, say); }
+    catch (e) {
+      if (!live()) return;
+      pickStatus(e && e.message === 'open' ? T('Could not open the photo. Try again.') : e && e.message === 'reader' ? T('Reader could not start. Type the items instead.') : T('Could not read this receipt. Take a closer, straighter photo in good light.'), 'warn');
+      pickMoreShow();
+      return;
+    }
+    if (!ok || !live()) { pickMoreShow(); return; }
+    const added = pick.parts[pick.parts.length - 1];
+    const res = analyseReceipt(joinParts(pick.parts));
+    if (!res.items.length) {
+      pick.parts.pop();
+      pickStatus(T('No items found on this photo. Make sure the whole receipt is in the picture and the print is sharp.'), 'warn');
+      pickMoreShow();
+      return;
+    }
+    // Keep what you already unticked or changed on earlier parts.
+    const old = new Map(pick.rows.map((r) => [r.item + '|' + r.price, r]));
+    pick.rows = res.items.map((it) => {
+      const q = Math.max(1, Math.round(it.qty || 1));
+      const bp = billParts(it);
+      const r = { item: bp.item, brand: '', size: bp.size, cat: '', qty: q, price: Math.round(((it.rate || it.amount / q) || 0) * 100) / 100, on: true, unclear: it.unclear };
+      const o = old.get(r.item + '|' + r.price);
+      if (o) { r.on = o.on; r.qty = o.qty; old.delete(r.item + '|' + r.price); }
+      return r;
+    });
+    let msg = plural(pick.rows.length, 'Found {n} item on the bill.', 'Found {n} items on the bill.') + (res.total ? ' ' + T('Bill total {x}.', { x: fmt(res.total) }) : ' ' + T('No total found yet. If the bill goes on, add the next part.'));
+    if (pick.parts.length > 1 && added.overlap === 0) msg += ' ' + T('This photo does not overlap the last one, so a line may be missing between them. Start each photo two lines above where the last one ended.');
+    pickStatus(msg, pick.parts.length > 1 && added.overlap === 0 ? 'warn' : 'ok');
+    renderPick();
+    pickMoreShow();
+  }
+  function pickMoreShow() {
+    const n = (pick.parts || []).length;
+    $('pickMore').hidden = !n || pick.mode !== 'bill';
+    $('pickMoreBtn').hidden = n >= MAX_PARTS;
+    $('pickParts').hidden = n < 2;
+    $('pickParts').textContent = n > 1 ? plural(n, '{n} part', '{n} parts') : '';
+  }
+
+  $('pickGo').addEventListener('click', () => {
+    const rows = pick.rows.filter((r) => r.on);
+    if (!rows.length) return;
+    const beforeList = list.items.slice();
+    rows.forEach((r) => addToList({ item: r.item, brand: r.brand, size: r.size, cat: r.cat, ur: r.ur }, r.qty));
+    let savedTrip = null;
+    if (pick.mode === 'bill' && $('pickSave').checked) {
+      // Keep the bill's prices: save it as a past trip so they appear in your history and price memory.
+      const shop = $('pickShop').value.trim().slice(0, 40);
+      const lines = rows.filter((r) => r.price > 0).map((r) => ({ price: r.price, qty: r.qty, note: nameOf(r), item: r.item, brand: '', size: r.size || '', cat: '' }));
+      if (lines.length) {
+        const sub = lines.reduce((a, l) => a + l.price * l.qty, 0);
+        savedTrip = cleanTrip({ id: Date.now(), at: new Date().toISOString(), total: sub, subtotal: sub, gstMode: 'incl', gstRate: gstRate(), shop, bill: 0, pieces: lines.reduce((a, l) => a + l.qty, 0), budget: 0, lines, fromBill: true });
+        history.unshift(savedTrip);
+        saveHistory();
+        if (shop) touchShop(shop);
+        cloudShare(savedTrip);
+      }
+    }
+    saveList();
+    closePick();
+    showTab('list');
+    toast(plural(rows.length, 'Added {n} item to your list', 'Added {n} items to your list') + (savedTrip ? STOP() + T('Bill saved in History') : ''), {
+      label: T('Undo'),
+      fn: () => {
+        list.items = beforeList; saveList();
+        if (savedTrip) { history = history.filter((t) => t.id !== savedTrip.id); saveHistory(); cloudUnshare(savedTrip); }
+        renderList();
+      }
+    });
+  });
+  $('pickAll').addEventListener('click', () => { pick.rows.forEach((r) => { r.on = true; }); renderPick(); });
+  $('pickNone').addEventListener('click', () => { pick.rows.forEach((r) => { r.on = false; }); renderPick(); });
+  $('pickCancel').addEventListener('click', closePick);
+  $('pickClose').addEventListener('click', closePick);
+  $('pickScrim').addEventListener('click', closePick);
+  $('qsStarter').addEventListener('click', openStarter);
+  $('qsMonth').addEventListener('click', openLastMonth);
+  $('pickBillFile').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (f) openFromBill(f, false);
+  });
+  $('pickBillMore').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (f) openFromBill(f, true);
+  });
+
+  /* ---------- Shared price database for family and friends (a Google Sheet owned by Haroon) ---------- */
+  // Every saved trip sends only its prices (item, brand, size, price, shop, date). No names or personal details.
+  // Everyone's app downloads the group's prices from the last 60 days when it opens.
+  const CLOUD = { url: '', code: 'trolley-4942684a81c0' }; // url: the Google Apps Script web app link
+  const CITY = 'Rawalpindi/Islamabad';
+  const OUTBOX_KEY = 'trolley-calc.outbox.v1';
+  let outbox = load(OUTBOX_KEY, []);
+  if (!Array.isArray(outbox)) outbox = [];
+  const saveOutbox = () => store(OUTBOX_KEY, outbox);
+  const cloudReady = () => /^https:\/\//.test(CLOUD.url);
+  const cloudOn = () => cloudReady() && settings.cloud !== false;
+  const SEND_DELAY = 90 * 1000; // wait a little so "Undo" can still cancel
+
+  function tripPayload(t) {
+    const items = [];
+    (t.lines || []).forEach((l) => {
+      const p = partsOf(l);
+      if (!keyOf(p) || !(l.price > 0) || items.length >= 80) return;
+      items.push({ i: String(p.item).slice(0, 40), b: String(p.brand).slice(0, 30), s: String(p.size).slice(0, 15), c: String(p.cat).slice(0, 15), p: Math.round(l.price * 100) / 100 });
+    });
+    return items.length ? { id: 't' + t.id + '_' + myDev.slice(1, 9), shop: String(t.shop || '').slice(0, 40), d: String(t.at).slice(0, 10), items, due: Date.now() + SEND_DELAY } : null;
+  }
+  function cloudShare(t) {
+    if (!cloudOn() || !t) return;
+    const p = tripPayload(t);
+    if (!p) return;
+    outbox = outbox.filter((x) => x.id !== p.id);
+    outbox.push(p);
+    saveOutbox();
+    setTimeout(flushOutbox, SEND_DELAY + 1000);
+  }
+  function cloudUnshare(t) {
+    const before = outbox.length;
+    outbox = outbox.filter((x) => x.id.indexOf('t' + t.id + '_') !== 0);
+    if (outbox.length !== before) saveOutbox();
+  }
+  let flushing = false;
+  async function flushOutbox() {
+    if (!cloudOn() || flushing || !navigator.onLine) return;
+    flushing = true;
+    try {
+      const now = Date.now();
+      const ready = outbox.filter((x) => (x.due || 0) <= now).slice(0, 20);
+      for (const x of ready) {
+        const body = JSON.stringify({ code: CLOUD.code, id: x.id, dev: myDev, city: CITY, shop: x.shop, d: x.d, items: x.items });
+        let j = null;
+        // Plain text body: Google Apps Script accepts it without an extra permission check from the browser.
+        try { const r = await fetch(CLOUD.url, { method: 'POST', body }); j = await r.json(); } catch (e) { break; }
+        if (j && (j.ok || j.error === 'code')) { outbox = outbox.filter((y) => y.id !== x.id); saveOutbox(); }
+        else break;
+      }
+    } finally { flushing = false; }
+  }
+  let pulling = false, lastPullAt = 0;
+  async function pullCloud(force) {
+    if (!cloudOn() || pulling || !navigator.onLine) return;
+    if (!force && Date.now() - lastPullAt < 10 * 60 * 1000) return;
+    pulling = true;
+    lastPullAt = Date.now();
+    try {
+      const r = await fetch(CLOUD.url + (CLOUD.url.indexOf('?') < 0 ? '?' : '&') + 'code=' + encodeURIComponent(CLOUD.code));
+      const j = await r.json();
+      if (!j || !j.ok || !Array.isArray(j.rows)) return;
+      // Rows: [trip, device, city, shop, date, item, brand, size, category, price]. Rebuilt in full each time,
+      // so a row hidden or deleted in the sheet disappears from everyone's app too.
+      const trips = new Map();
+      j.rows.forEach((row) => {
+        if (!Array.isArray(row) || row.length < 10) return;
+        const [id, dev, city, shop, d, i, b, s, c, p] = row;
+        const price = Number(p);
+        if (String(city) !== CITY || !(price > 0 && price < 500000) || !(i || b)) return;
+        let t = trips.get(id);
+        if (!t) { t = { id: String(id), dev: String(dev), shop: String(shop || '').slice(0, 40), d: String(d || '').slice(0, 10), items: [] }; trips.set(id, t); }
+        t.items.push({ i: String(i || '').slice(0, 40), b: String(b || '').slice(0, 30), s: String(s || '').slice(0, 15), c: String(c || '').slice(0, 15), p: price });
+      });
+      cloudData = { trips: Array.from(trips.values()), pulled: new Date().toISOString() };
+      store(CLOUD_KEY, cloudData);
+      memCache = null;
+      if (!$('menuWrap').hidden) renderCloudInfo();
+    } catch (e) {} finally { pulling = false; }
+  }
+  // Share your own recent trips once, the first time sharing is on.
+  function backfillOnce() {
+    if (!cloudOn() || settings.cloudBackfilled) return;
+    history.filter((t) => daysAgo(t.at) <= 60).forEach((t) => {
+      const p = tripPayload(t);
+      if (p && !outbox.some((x) => x.id === p.id)) { p.due = 0; outbox.push(p); }
+    });
+    saveOutbox();
+    settings.cloudBackfilled = true;
+    saveSettings();
+  }
+  function renderCloudInfo() {
+    const row = $('cloudRow');
+    row.hidden = !cloudReady();
+    if (!cloudReady()) return;
+    $('cloudToggle').checked = settings.cloud !== false;
+    const others = cloudData.trips.filter((t) => t.dev !== myDev);
+    const people = new Set(others.map((t) => t.dev)).size;
+    const n = others.reduce((a, t) => a + t.items.length, 0);
+    let txt = settings.cloud === false ? T('Off. Your prices stay on this phone.') : n ? (people === 1 ? T('{n} prices from 1 person', { n: fmt0(n) }) : T('{n} prices from {p} people', { n: fmt0(n), p: people })) : T('On. Prices from your group will appear here.');
+    if (settings.cloud !== false && outbox.length) txt += ' · ' + plural(outbox.length, '{n} trip waiting to send', '{n} trips waiting to send');
+    $('cloudInfo').textContent = txt;
+  }
+  $('cloudToggle').addEventListener('change', () => {
+    settings.cloud = $('cloudToggle').checked;
+    saveSettings();
+    if (settings.cloud) { backfillOnce(); flushOutbox(); pullCloud(true); }
+    renderCloudInfo();
+  });
+  $('openMenu').addEventListener('click', renderCloudInfo);
+  window.addEventListener('online', () => { flushOutbox(); pullCloud(false); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { flushOutbox(); pullCloud(false); } });
+  setTimeout(() => { backfillOnce(); flushOutbox(); pullCloud(true); }, 1500);
+  setInterval(flushOutbox, 60 * 1000);
 
   /* ---------- Start ---------- */
   applyLang();
